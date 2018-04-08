@@ -1,11 +1,11 @@
-let sections = 16;
+let sections = 32;
 let increment = 2 * Math.PI / sections;
 let hOffset = 0;
 let vOffset = 0;
 
 let reflect = true;
-let correction = false;
-let samples = 50;
+let correction = true;
+let fidelityRatio = 0.15;
 let drawGuides = true;
 
 let ctrl = false;
@@ -36,7 +36,6 @@ function draw(){
 }
 
 function mousePressed(){
-    
     currentPoints.push({x:mouseX - hOffset, y:mouseY - vOffset});
 
     push();
@@ -48,8 +47,6 @@ function mousePressed(){
 function mouseReleased(){
     pop();
     commitCurve(correction);
-    currentPoints = new Array();
-    curves.push(currentLine);
     drawLines();
 }
 
@@ -63,11 +60,10 @@ function drawNewLine(){
     for(let i = 0; i < sections; i++){
         push();
         rotate(increment*i);
-        if(i%2 != 0){
+        if(reflect && i%2 != 0){
             rotate(increment);
             scale(1.0, -1.0);
         }
-        
         line(currentPoints[currentPoints.length-1].x, currentPoints[currentPoints.length-1].y, xpos, ypos);
         pop();
     }
@@ -87,18 +83,20 @@ function commitCurve(){
         currentLine.noFill();
         currentLine.rotate(increment*i);
 
-        if(i%2 != 0){
+        if(reflect && i%2 != 0){
             currentLine.rotate(increment);
             currentLine.scale(1.0, -1.0);;
         }
         
         if(correction){
             currentLine.beginShape();
+            let samples = Math.ceil(currentPoints.length * fidelityRatio);
             currentLine.curveVertex(currentPoints[0].x, currentPoints[0].y);
             for(let j = 0; j < samples; j++){
                 currentLine.curveVertex(currentPoints[Math.floor(j*currentPoints.length/samples)].x, currentPoints[Math.floor(j*currentPoints.length/samples)].y);
             }
-            currentLine.curveVertex(mouseX - hOffset, mouseY - vOffset);
+            currentLine.curveVertex(currentPoints[currentPoints.length-1].x, currentPoints[currentPoints.length-1].y);
+            currentLine.curveVertex(currentPoints[currentPoints.length-1].x, currentPoints[currentPoints.length-1].y);
             currentLine.endShape();
         }
         else{
@@ -108,6 +106,8 @@ function commitCurve(){
 
         currentLine.pop();
     }
+    currentPoints = new Array();
+    curves.push(currentLine);
 }
 
 function drawLines(){
@@ -125,7 +125,7 @@ function drawBackground(){
         guides.push();
         guides.translate(hOffset, vOffset);
         for(let i = 0; i < sections; i++){
-            guides.line(75, 0, width, 0);
+            guides.line(75, 0, width*2, 0);
             guides.rotate(increment);
         }
         guides.pop();
@@ -137,16 +137,23 @@ function keyPressed(){
     if (keyCode == CONTROL){ 
         ctrl = true;
     }
-    if (keyCode == SHIFT){ 
-        noLoop();
-    }
-}
-
-function keyTyped(){
     if(ctrl){
-        if (keyCode == 26) {
+        if (keyCode == 90) {
             curves.pop();
             drawLines();
+        }
+        else if (keyCode == 83) {
+            let final = createGraphics(width*2, height*2);
+            final.scale(2,2);
+            for(let i = 0; i < curves.length; i++){
+                final.image(curves[i], 0, 0);
+            }
+            final.filter(INVERT);
+            save(final, "mandala.png");
+            /*filter(THRESHOLD);
+            filter(INVERT);
+            save("mandala.png");
+            drawLines();*/
         }
     }
     return false;
