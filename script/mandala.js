@@ -1,138 +1,188 @@
-let sections = 32;
-let increment = 2 * Math.PI / sections;
-let hOffset = 0;
-let vOffset = 0;
+let sections;
+let increment;
+let scaleFactor;
 
-let reflect = true;
-let correction = true;
-let fidelityRatio = 0.15;
-let drawGuides = true;
+let showGuides;
+let reflect;
+let smoothLines;
+let samplePercentage;
 
-let ctrl = false;
+let xOffset;
+let yOffset;
+let currentlyDrawing;
 
 let cnv;
-let guides;
-
-let currentLine;
-let currentPoints = new Array();;
-
-let curves = new Array();
+let points;
+let currentCurve;
+let curves;
 
 function setup(){
+    initSketch(8);
+}
+
+function initSketch(s){
     cnv = createCanvas(windowWidth, windowHeight);
     cnv.parent("mandala");
-
-    guides = createGraphics(width, height);
-    
-    hOffset = Math.floor(width / 2);
-    vOffset = Math.floor(height / 2);
-
-    drawBackground();
+    cnv.mousePressed(beginCurveDrawing);
+    cnv.mouseMoved(doDrawing);
+    cnv.mouseReleased(finishDrawing);
+    pixelDensity(1);
     noLoop();
+
+    sections = s/1;
+    increment = 2 * Math.PI / sections;
+    scaleFactor = 3;
+    samplePercentage = 0.3;
+    reflect = true;
+    showGuides = true;
+    smoothLines = true;
+
+    xOffset = Math.floor(cnv.width * 0.5);
+    yOffset = Math.floor(cnv.height * 0.5);
+    currentlyDrawing = false;
+
+    curves = new Array();
+    drawAll(showGuides);
 }
 
-function draw(){
-    
+function beginCurveDrawing(){
+    points = new Array(transMouse());
+    configGraphics();
+    currentlyDrawing = true;
 }
 
-function mousePressed(){
-    currentPoints.push({x:mouseX - hOffset, y:mouseY - vOffset});
-
-    push();
-    translate(hOffset, vOffset);
-    stroke(200);
-    strokeWeight(2);
+function doDrawing(){
+    if(currentlyDrawing){
+        points.push(transMouse());
+        drawCurve(currentCurve, points);
+        image(currentCurve, 0, 0);
+    }
 }
 
-function mouseReleased(){
-    pop();
-    commitCurve(correction);
-    drawLines();
+function finishDrawing(){
+    currentlyDrawing = false;
+    addCurve(samplePercentage);
+    drawAll(showGuides);
 }
 
-function mouseDragged(){
-    drawNewLine();
-}
-
-function drawNewLine(){
-    let xpos = mouseX - hOffset;
-    let ypos = mouseY - vOffset;
-    for(let i = 0; i < sections; i++){
-        push();
-        rotate(increment*i);
-        if(reflect && i%2 != 0){
-            rotate(increment);
-            scale(1.0, -1.0);
+function drawCurve(container, samples, ref = reflect){
+    container.push();
+    container.translate(xOffset, yOffset);
+    for(let s = 0; s < sections; s++){
+        container.push();
+        container.rotate(s * increment);
+        if(ref && s%2 != 0){
+            container.rotate(increment);
+            container.scale(1.0, -1.0);;
         }
-        line(currentPoints[currentPoints.length-1].x, currentPoints[currentPoints.length-1].y, xpos, ypos);
+        container.beginShape();
+        container.curveVertex(samples[0].x, samples[0].y);
+        for(let i = 0; i < samples.length; i++){
+            container.curveVertex(samples[i].x, samples[i].y);
+        }
+        container.curveVertex(samples[samples.length-1].x, samples[samples.length-1].y);
+        container.endShape();
+        container.pop();
+    }
+    container.pop();
+}
+
+function addCurve(sp){
+    currentCurve.remove();
+    configGraphics();
+    let totalSamples = Math.ceil((sp * points.length)-1);
+    let newPoints = new Array();
+    for(let i = 0; i < totalSamples; i++){
+        newPoints.push(points[Math.floor(i*points.length/totalSamples)]);
+    }
+    newPoints.push(points[points.length-1]);
+    drawCurve(currentCurve, newPoints);
+    curves.push(currentCurve);
+    currentCurve.remove();
+}
+
+function drawAll(shg = showGuides){
+    clear();
+    if(shg){
+        push();
+        translate(xOffset, yOffset);
+        stroke(120);
+        strokeWeight(0.4);
+        for(let s = 0; s < sections; s++){
+            rotate(increment);
+            line(80, 0, width*2, 0);
+        }
         pop();
     }
-    currentPoints.push({x:xpos, y:ypos});
-}
 
-function commitCurve(){
-    currentLine = createGraphics(width, height);
-    currentLine.translate(hOffset, vOffset);
-    currentLine.stroke(255);
-    currentLine.strokeJoin(ROUND);
-    currentLine.strokeCap(ROUND);
-    currentLine.strokeWeight(3);
-
-    for(let i = 0; i < sections; i++){
-        currentLine.push();
-        currentLine.noFill();
-        currentLine.rotate(increment*i);
-
-        if(reflect && i%2 != 0){
-            currentLine.rotate(increment);
-            currentLine.scale(1.0, -1.0);;
+    if(!smoothLines){
+        background(0);
+        for(let i = 0; i < curves.length; i++){
+            image(curves[i], 0, 0);
         }
-        
-        if(correction){
-            currentLine.beginShape();
-            let samples = Math.ceil(currentPoints.length * fidelityRatio);
-            currentLine.curveVertex(currentPoints[0].x, currentPoints[0].y);
-            for(let j = 0; j < samples; j++){
-                currentLine.curveVertex(currentPoints[Math.floor(j*currentPoints.length/samples)].x, currentPoints[Math.floor(j*currentPoints.length/samples)].y);
-            }
-            currentLine.curveVertex(currentPoints[currentPoints.length-1].x, currentPoints[currentPoints.length-1].y);
-            currentLine.curveVertex(currentPoints[currentPoints.length-1].x, currentPoints[currentPoints.length-1].y);
-            currentLine.endShape();
-        }
-        else{
-            for(let j = 1; j < currentPoints.length; j++)
-                currentLine.line(currentPoints[j-1].x, currentPoints[j-1].y, currentPoints[j].x, currentPoints[j].y);
-        }
-
-        currentLine.pop();
+        filter(THRESHOLD);
     }
-    currentPoints = new Array();
-    curves.push(currentLine);
+    else{
+        for(let i = 0; i < curves.length; i++){
+            image(curves[i], 0, 0);
+        }
+    }
 }
 
-function drawLines(){
-    drawBackground();
+function saveDrawing(sl = smoothLines){
+    let final = createGraphics(width * scaleFactor, height * scaleFactor);
+    final.scale(scaleFactor, scaleFactor);
     for(let i = 0; i < curves.length; i++){
-        image(curves[i], 0, 0);
+        final.image(curves[i], 0, 0);
     }
+    final.filter(INVERT);
+
+    if(!sl){
+        final.loadPixels();
+        for (let i = 0; i < final.pixels.length; i += 4) {
+            final.pixels[i+3] = (final.pixels[i+3] > 127) ? 255 : 0;
+        }
+        final.updatePixels();
+    }
+    
+    save(final, "mandala.png");
+    final.remove();
 }
 
-function drawBackground(){
-    guides.background(0);
-    if(drawGuides){
-        guides.stroke(120);
-        guides.strokeWeight(0.3);
-        guides.push();
-        guides.translate(hOffset, vOffset);
-        for(let i = 0; i < sections; i++){
-            guides.line(75, 0, width*2, 0);
-            guides.rotate(increment);
-        }
-        guides.pop();
-        }
-    image(guides, 0, 0);
+function toggleSmooth(){
+    smoothLines = !smoothLines;
+    drawAll(showGuides);
 }
 
+function toggleGuides(){
+    showGuides = !showGuides;
+    if(showGuides) smoothLines = true;
+    drawAll(showGuides);
+}
+
+function transMouse(){
+    return({x:mouseX - xOffset, y:mouseY - yOffset});
+}
+
+function setSections(ns){
+    if(ns < 2) ns = 2;
+    reflect = ns % 2 == 0;
+    sections = ns;
+    increment = 2 * Math.PI / sections;
+    drawAll(showGuides);
+}
+
+function configGraphics(){
+    currentCurve = createGraphics(cnv.width, cnv.height);
+    currentCurve.clear();
+    currentCurve.noFill();
+    currentCurve.stroke(255);
+    currentCurve.strokeWeight(3);
+    currentCurve.strokeCap(ROUND);
+    currentCurve.strokeJoin(ROUND);
+}
+
+let ctrl = false;
 function keyPressed(){
     if (keyCode == CONTROL){ 
         ctrl = true;
@@ -140,20 +190,10 @@ function keyPressed(){
     if(ctrl){
         if (keyCode == 90) {
             curves.pop();
-            drawLines();
+            drawAll(showGuides);
         }
         else if (keyCode == 83) {
-            let final = createGraphics(width*2, height*2);
-            final.scale(2,2);
-            for(let i = 0; i < curves.length; i++){
-                final.image(curves[i], 0, 0);
-            }
-            final.filter(INVERT);
-            save(final, "mandala.png");
-            /*filter(THRESHOLD);
-            filter(INVERT);
-            save("mandala.png");
-            drawLines();*/
+            saveDrawing();
         }
     }
     return false;
