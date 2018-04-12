@@ -6,6 +6,7 @@ let showGuides;
 let reflect;
 let smoothLines;
 let samplePercentage;
+let colorMode;
 
 let xOffset;
 let yOffset;
@@ -15,9 +16,11 @@ let cnv;
 let points;
 let currentCurve;
 let curves;
+let currentRegion;
+let regions;
 
 function setup(){
-    initSketch(8);
+    initSketch(32);
 }
 
 function initSketch(s){
@@ -32,16 +35,18 @@ function initSketch(s){
     sections = s/1;
     increment = 2 * Math.PI / sections;
     scaleFactor = 3;
-    samplePercentage = 0.3;
+    samplePercentage = 0.15;
     reflect = true;
-    showGuides = true;
-    smoothLines = true;
+    showGuides = false;
+    smoothLines = false;
+    colorMode = false;
 
     xOffset = Math.floor(cnv.width * 0.5);
     yOffset = Math.floor(cnv.height * 0.5);
     currentlyDrawing = false;
 
     curves = new Array();
+    regions = new Array();
     drawAll(showGuides);
 }
 
@@ -114,19 +119,33 @@ function drawAll(shg = showGuides){
         }
         pop();
     }
+    
+    let regionsLayer = createGraphics(cnv.width, cnv.height);
+    regionsLayer.clear();
+    for(let i = 0; i < regions.length; i++){
+        regionsLayer.image(regions[i], 0, 0);
+    }
+
+    let curvesLayer = createGraphics(cnv.width, cnv.height);
+    curvesLayer.clear();
+    for(let i = 0; i < curves.length; i++){
+        curvesLayer.image(curves[i], 0, 0);
+    }
 
     if(!smoothLines){
-        background(0);
-        for(let i = 0; i < curves.length; i++){
-            image(curves[i], 0, 0);
+        curvesLayer.loadPixels();
+        for (let i = 0; i < curvesLayer.pixels.length; i += 4) {
+            if(curvesLayer.pixels[i+3] != 0){
+                curvesLayer.pixels[i+3] = 255;
+            }
         }
-        filter(THRESHOLD);
+        curvesLayer.updatePixels();
     }
-    else{
-        for(let i = 0; i < curves.length; i++){
-            image(curves[i], 0, 0);
-        }
-    }
+
+    image(regionsLayer, 0, 0);
+    image(curvesLayer, 0, 0);
+    regionsLayer.remove();
+    curvesLayer.remove();
 }
 
 function saveDrawing(sl = smoothLines){
@@ -158,6 +177,22 @@ function toggleGuides(){
     showGuides = !showGuides;
     if(showGuides) smoothLines = true;
     drawAll(showGuides);
+}
+
+function switchMode(){
+    colorMode = !colorMode
+    if(colorMode){
+        
+        
+    }else{
+        cnv.mousePressed(beginCurveDrawing);
+        cnv.mouseMoved(doDrawing);
+        cnv.mouseReleased(finishDrawing);
+    }
+    smoothLines = !colorMode;
+    showGuides = !colorMode;
+    drawAll(showGuides);
+    
 }
 
 function transMouse(){
@@ -203,4 +238,87 @@ function keyReleased(){
     if(keyCode == CONTROL){
         ctrl = false;
     }
+}
+
+function colorRegion(xpos, ypos, newColor, ref = false){
+    let startColor = cnv.get(xpos, ypos);
+    if(matchColors(startColor, newColor)){
+        return false;
+    }
+    let pixStack = new Array({x:xpos, y:ypos});
+    loadPixels();
+    currentRegion = createGraphics(cnv.width, cnv.height);
+    currentRegion.loadPixels();
+    while(pixStack.length > 0){
+        let pix = pixStack.pop();
+        let searchLeft = false;
+        let searchRight = false;
+        
+        while(pix.y >= 0){
+            pix.y--;
+            let ppos = (pix.y*cnv.width+pix.x) * 4;
+            let cc = [pixels[ppos], pixels[ppos+1], pixels[ppos+2]];
+            if(!matchColors(cc, startColor)){
+                break;
+            }
+        }
+        
+        while(pix.y < cnv.height){
+            pix.y++;
+            let ppos = (pix.y*cnv.width+pix.x) * 4;
+            let cc = [pixels[ppos], pixels[ppos+1], pixels[ppos+2]];
+            if(!matchColors(cc, startColor)){
+                pix.y--;
+                break;
+            }
+            
+            pixels[ppos] = newColor[0];
+            pixels[ppos+1] = newColor[1];
+            pixels[ppos+2] = newColor[2];
+            pixels[ppos+3] = 255;
+            
+            currentRegion.pixels[ppos] = newColor[0];
+            currentRegion.pixels[ppos+1] = newColor[1];
+            currentRegion.pixels[ppos+2] = newColor[2];
+            currentRegion.pixels[ppos+3] = 255;
+            
+            
+            
+            if(pix.x > 0){
+                ppos = (pix.y*cnv.width+pix.x-1) * 4;
+                cc = [pixels[ppos], pixels[ppos+1], pixels[ppos+2]];
+                if(matchColors(cc, startColor)){
+                    if(!searchLeft){
+                        pixStack.push({x:pix.x-1, y:pix.y});
+                        searchLeft = true;
+                    }
+                }
+                else if(searchLeft){
+                    searchLeft = false;
+                }
+            }
+
+            if(pix.x < cnv.width - 1){
+                ppos = (pix.y*cnv.width+pix.x+1) * 4;
+                cc = [pixels[ppos], pixels[ppos+1], pixels[ppos+2]];
+                if(matchColors(cc, startColor)){
+                    if(!searchRight){
+                        pixStack.push({x:pix.x+1, y:pix.y});
+                        searchRight = true;
+                    }
+                }
+                else if(searchRight){
+                    searchRight = false;
+                }
+            }
+        }
+    }
+    currentRegion.updatePixels();
+    regions.push(currentRegion);
+    currentRegion.remove();
+    updatePixels();
+}
+
+function matchColors(firstColor, secondColor){
+    return (firstColor[0] == secondColor[0] && firstColor[1] == secondColor[1] && firstColor[2] == secondColor[2]);
 }
