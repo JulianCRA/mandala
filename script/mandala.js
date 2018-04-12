@@ -16,8 +16,6 @@ let cnv;
 let points;
 let currentCurve;
 let curves;
-let currentRegion;
-let regions;
 
 function setup(){
     initSketch(32);
@@ -37,8 +35,8 @@ function initSketch(s){
     scaleFactor = 3;
     samplePercentage = 0.15;
     reflect = true;
-    showGuides = false;
-    smoothLines = false;
+    showGuides = true;
+    smoothLines = true;
     colorMode = false;
 
     xOffset = Math.floor(cnv.width * 0.5);
@@ -46,7 +44,6 @@ function initSketch(s){
     currentlyDrawing = false;
 
     curves = new Array();
-    regions = new Array();
     drawAll(showGuides);
 }
 
@@ -108,6 +105,20 @@ function addCurve(sp){
 
 function drawAll(shg = showGuides){
     clear();
+    for(let i = 0; i < curves.length; i++){
+        image(curves[i], 0, 0);
+    }
+
+    if(!smoothLines){
+        loadPixels();
+        for (let i = 0; i < pixels.length; i += 4) {
+            if(pixels[i+3] != 0){
+                pixels[i+3] = 255;
+            }
+        }
+        updatePixels();
+    }
+    
     if(shg){
         push();
         translate(xOffset, yOffset);
@@ -119,33 +130,6 @@ function drawAll(shg = showGuides){
         }
         pop();
     }
-    
-    let regionsLayer = createGraphics(cnv.width, cnv.height);
-    regionsLayer.clear();
-    for(let i = 0; i < regions.length; i++){
-        regionsLayer.image(regions[i], 0, 0);
-    }
-
-    let curvesLayer = createGraphics(cnv.width, cnv.height);
-    curvesLayer.clear();
-    for(let i = 0; i < curves.length; i++){
-        curvesLayer.image(curves[i], 0, 0);
-    }
-
-    if(!smoothLines){
-        curvesLayer.loadPixels();
-        for (let i = 0; i < curvesLayer.pixels.length; i += 4) {
-            if(curvesLayer.pixels[i+3] != 0){
-                curvesLayer.pixels[i+3] = 255;
-            }
-        }
-        curvesLayer.updatePixels();
-    }
-
-    image(regionsLayer, 0, 0);
-    image(curvesLayer, 0, 0);
-    regionsLayer.remove();
-    curvesLayer.remove();
 }
 
 function saveDrawing(sl = smoothLines){
@@ -240,15 +224,29 @@ function keyReleased(){
     }
 }
 
-function colorRegion(xpos, ypos, newColor, ref = false){
+function colorRegion(xpos, ypos, newColor = [random(255),random(255),random(255)], ref = false){
     let startColor = cnv.get(xpos, ypos);
     if(matchColors(startColor, newColor)){
         return false;
     }
     let pixStack = new Array({x:xpos, y:ypos});
+    
+    let cvs = createGraphics(cnv.width, cnv.height);
+    for(let i = 0; i < curves.length; i++){
+        cvs.image(curves[i], 0, 0);
+    }
+    
+    if(!smoothLines){
+        cvs.loadPixels();
+        for (let i = 0; i < cvs.pixels.length; i += 4) {
+            cvs.pixels[i+3] = (cvs.pixels[i+3] > 127) ? 255 : 0;
+        }
+        cvs.updatePixels();
+    }
+
     loadPixels();
-    currentRegion = createGraphics(cnv.width, cnv.height);
-    currentRegion.loadPixels();
+    configGraphics();
+    currentCurve.loadPixels();
     while(pixStack.length > 0){
         let pix = pixStack.pop();
         let searchLeft = false;
@@ -277,12 +275,10 @@ function colorRegion(xpos, ypos, newColor, ref = false){
             pixels[ppos+2] = newColor[2];
             pixels[ppos+3] = 255;
             
-            currentRegion.pixels[ppos] = newColor[0];
-            currentRegion.pixels[ppos+1] = newColor[1];
-            currentRegion.pixels[ppos+2] = newColor[2];
-            currentRegion.pixels[ppos+3] = 255;
-            
-            
+            currentCurve.pixels[ppos] = newColor[0];
+            currentCurve.pixels[ppos+1] = newColor[1];
+            currentCurve.pixels[ppos+2] = newColor[2];
+            currentCurve.pixels[ppos+3] = 255;
             
             if(pix.x > 0){
                 ppos = (pix.y*cnv.width+pix.x-1) * 4;
@@ -313,9 +309,9 @@ function colorRegion(xpos, ypos, newColor, ref = false){
             }
         }
     }
-    currentRegion.updatePixels();
-    regions.push(currentRegion);
-    currentRegion.remove();
+    currentCurve.updatePixels();
+    curves.push(currentCurve);
+    currentCurve.remove();
     updatePixels();
 }
 
