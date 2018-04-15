@@ -1,5 +1,72 @@
 body{
-    background: #9e4242;
+    background: #000000;
     margin: 0;
     padding: 0;
+}
+
+#mandala{
+    position: absolute;
+    margin: 0;
+    padding: 0;
+}
+
+#controls{
+    position: absolute;
+    background: #ffffff70;
+    height: 100%;
+    width: 250;
+    overflow-x: hidden;
+    transition: 0.5s;
+    transition-timing-function: ease-out;
+    margin: 0;
+    padding: 0;
+    left: -250px;
+}
+
+#quickaccess{
+    width: 250px;
+    padding-left: 10px;
+    padding-top: 10px;
+    user-select: none;
+    -moz-user-select: none;
+    -khtml-user-select: none;
+    -webkit-user-select: none;
+    -o-user-select: none;
+}
+
+.tools-button{
+    position: relative;
+    -moz-border-radius:22px;
+	-webkit-border-radius:22px;
+	border-radius:22px;
+	display:inline-block;
+	cursor:pointer;
+	color:#ffffff;
+    margin:5px;
+    border:solid 2px transparent;
+    width: 40px;
+    height: 40px;
+    outline: none;
+}
+.tools-button:hover {
+    border-color: #ffffff;
+    border-width: 2px;
+    border-style: solid;
+}
+.tools-button:active {
+	position:relative;
+	top:1px;
+}
+
+#togglemenubtn{
+    background: url('../img/toolsbtn.png') center no-repeat;
+}
+#undobtn{
+    background: url('../img/undobtn.png') center no-repeat;
+}
+#deletebtn{
+    background: url('../img/deletebtn.png') center no-repeat;
+}
+#savebtn{
+    background: url('../img/savebtn.png') center no-repeat;
 }

@@ -1,10 +1,24 @@
 <html>
     <head>
+        <script src="script/jquery-3.3.1.slim.min.js"></script>
+
         <script src="script/p5.min.js"></script>
+        <script src="script/Drawing.js"></script>
+        <script src="script/DrawingTool.js"></script>
         <script src="script/mandala.js"></script>
         <link rel="stylesheet" type="text/css" href="style/style.css">
     </head>
     <body>
         <div id = "mandala"></div>
+        
+        <div id="controls">
+            <input type="color">
+        </div>
+        <div id="quickaccess">
+            <button id="togglemenubtn" class="tools-button" onclick="slideToolsMenu()"></button>
+            <button id="undobtn" class="tools-button" onclick="undo()"></button>
+            <button id="deletebtn" class="tools-button" onclick="restart()"></button>
+            <button id="savebtn" class="tools-button" onclick="save()"></button>
+        </div>
     </body>
 </html>

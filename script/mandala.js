@@ -1,21 +1,11 @@
-let sections;
-let increment;
-let scaleFactor;
+/*jshint esversion: 6 */
+const FREEHAND = 0;
+const BUCKET = 1;
 
-let showGuides;
-let reflect;
-let smoothLines;
-let samplePercentage;
-let colorMode;
-
-let xOffset;
-let yOffset;
-let currentlyDrawing;
-
+let mandala;
 let cnv;
-let points;
-let currentCurve;
-let curves;
+let currentlyDrawing;
+let mode;
 
 function setup(){
     initSketch(32);
@@ -24,181 +14,60 @@ function setup(){
 function initSketch(s){
     cnv = createCanvas(windowWidth, windowHeight);
     cnv.parent("mandala");
-    cnv.mousePressed(beginCurveDrawing);
-    cnv.mouseMoved(doDrawing);
-    cnv.mouseReleased(finishDrawing);
-    pixelDensity(1);
-    noLoop();
 
-    sections = s/1;
-    increment = 2 * Math.PI / sections;
-    scaleFactor = 3;
-    samplePercentage = 0.15;
-    reflect = true;
-    showGuides = true;
-    smoothLines = true;
-    colorMode = false;
-
-    xOffset = Math.floor(cnv.width * 0.5);
-    yOffset = Math.floor(cnv.height * 0.5);
+    cnv.stroke(170);
+    cnv.strokeWeight(2);
+    cnv.strokeCap(ROUND);
+    cnv.strokeJoin(ROUND);
+    
+    cnv.mousePressed(pressed);
+    cnv.mouseMoved(moved);
+    cnv.mouseReleased(released);
     currentlyDrawing = false;
+    mode = FREEHAND;
 
-    curves = new Array();
-    drawAll(showGuides);
+    mandala = new DrawingTool(cnv.width, cnv.height, s);
+    image(mandala.canvas, 0, 0);
 }
 
-function beginCurveDrawing(){
-    points = new Array(transMouse());
-    configGraphics();
-    currentlyDrawing = true;
-}
-
-function doDrawing(){
-    if(currentlyDrawing){
-        points.push(transMouse());
-        drawCurve(currentCurve, points);
-        image(currentCurve, 0, 0);
-    }
-}
-
-function finishDrawing(){
-    currentlyDrawing = false;
-    addCurve(samplePercentage);
-    drawAll(showGuides);
-}
-
-function drawCurve(container, samples, ref = reflect){
-    container.push();
-    container.translate(xOffset, yOffset);
-    for(let s = 0; s < sections; s++){
-        container.push();
-        container.rotate(s * increment);
-        if(ref && s%2 != 0){
-            container.rotate(increment);
-            container.scale(1.0, -1.0);;
-        }
-        container.beginShape();
-        container.curveVertex(samples[0].x, samples[0].y);
-        for(let i = 0; i < samples.length; i++){
-            container.curveVertex(samples[i].x, samples[i].y);
-        }
-        container.curveVertex(samples[samples.length-1].x, samples[samples.length-1].y);
-        container.endShape();
-        container.pop();
-    }
-    container.pop();
-}
-
-function addCurve(sp){
-    currentCurve.remove();
-    configGraphics();
-    let totalSamples = Math.ceil((sp * points.length)-1);
-    let newPoints = new Array();
-    for(let i = 0; i < totalSamples; i++){
-        newPoints.push(points[Math.floor(i*points.length/totalSamples)]);
-    }
-    newPoints.push(points[points.length-1]);
-    drawCurve(currentCurve, newPoints);
-    curves.push(currentCurve);
-    currentCurve.remove();
-}
-
-function drawAll(shg = showGuides){
+function bucketFill(){
+    mandala.bucketPaint(mouseX, mouseY);
     clear();
-    for(let i = 0; i < curves.length; i++){
-        image(curves[i], 0, 0);
-    }
+    image(mandala.canvas, 0, 0);
+}
 
-    if(!smoothLines){
-        loadPixels();
-        for (let i = 0; i < pixels.length; i += 4) {
-            if(pixels[i+3] != 0){
-                pixels[i+3] = 255;
+function pressed(){
+    switch(mode){
+        case FREEHAND:
+            currentlyDrawing = true;        
+            mandala.addPoint(mouseX, mouseY, currentlyDrawing);
+        break;
+    }
+}
+
+function moved(){
+    switch(mode){
+        case FREEHAND:
+            if(currentlyDrawing){
+                mandala.addPoint(mouseX, mouseY);
+                mandala.drawCurve(cnv);
             }
-        }
-        updatePixels();
-    }
-    
-    if(shg){
-        push();
-        translate(xOffset, yOffset);
-        stroke(120);
-        strokeWeight(0.4);
-        for(let s = 0; s < sections; s++){
-            rotate(increment);
-            line(80, 0, width*2, 0);
-        }
-        pop();
+        break;
     }
 }
 
-function saveDrawing(sl = smoothLines){
-    let final = createGraphics(width * scaleFactor, height * scaleFactor);
-    final.scale(scaleFactor, scaleFactor);
-    for(let i = 0; i < curves.length; i++){
-        final.image(curves[i], 0, 0);
+function released(){
+    switch(mode){
+        case FREEHAND:
+            currentlyDrawing = false;
+            mandala.addPoint(mouseX, mouseY, currentlyDrawing);
+            clear();
+            image(mandala.canvas, 0, 0);
+        break;
+        case BUCKET:
+            bucketFill();
+        break;
     }
-    final.filter(INVERT);
-
-    if(!sl){
-        final.loadPixels();
-        for (let i = 0; i < final.pixels.length; i += 4) {
-            final.pixels[i+3] = (final.pixels[i+3] > 127) ? 255 : 0;
-        }
-        final.updatePixels();
-    }
-    
-    save(final, "mandala.png");
-    final.remove();
-}
-
-function toggleSmooth(){
-    smoothLines = !smoothLines;
-    drawAll(showGuides);
-}
-
-function toggleGuides(){
-    showGuides = !showGuides;
-    if(showGuides) smoothLines = true;
-    drawAll(showGuides);
-}
-
-function switchMode(){
-    colorMode = !colorMode
-    if(colorMode){
-        
-        
-    }else{
-        cnv.mousePressed(beginCurveDrawing);
-        cnv.mouseMoved(doDrawing);
-        cnv.mouseReleased(finishDrawing);
-    }
-    smoothLines = !colorMode;
-    showGuides = !colorMode;
-    drawAll(showGuides);
-    
-}
-
-function transMouse(){
-    return({x:mouseX - xOffset, y:mouseY - yOffset});
-}
-
-function setSections(ns){
-    if(ns < 2) ns = 2;
-    reflect = ns % 2 == 0;
-    sections = ns;
-    increment = 2 * Math.PI / sections;
-    drawAll(showGuides);
-}
-
-function configGraphics(){
-    currentCurve = createGraphics(cnv.width, cnv.height);
-    currentCurve.clear();
-    currentCurve.noFill();
-    currentCurve.stroke(255);
-    currentCurve.strokeWeight(3);
-    currentCurve.strokeCap(ROUND);
-    currentCurve.strokeJoin(ROUND);
 }
 
 let ctrl = false;
@@ -208,11 +77,10 @@ function keyPressed(){
     }
     if(ctrl){
         if (keyCode == 90) {
-            curves.pop();
-            drawAll(showGuides);
+            undo();
         }
         else if (keyCode == 83) {
-            saveDrawing();
+            //saveDrawing();
         }
     }
     return false;
@@ -224,97 +92,33 @@ function keyReleased(){
     }
 }
 
-function colorRegion(xpos, ypos, newColor = [random(255),random(255),random(255)], ref = false){
-    let startColor = cnv.get(xpos, ypos);
-    if(matchColors(startColor, newColor)){
-        return false;
+let isMenuActive = false;
+function slideToolsMenu(){
+    isMenuActive = !isMenuActive;
+    if(isMenuActive){
+        document.getElementById("controls").style.left = "0px";
+        document.getElementById("togglemenubtn").style.background = "url('./img/closebtn.png') center no-repeat";
     }
-    let pixStack = new Array({x:xpos, y:ypos});
-    
-    let cvs = createGraphics(cnv.width, cnv.height);
-    for(let i = 0; i < curves.length; i++){
-        cvs.image(curves[i], 0, 0);
+    else{
+        document.getElementById("controls").style.left = "-250px";
+        document.getElementById("togglemenubtn").style.background = "url('./img/toolsbtn.png') center no-repeat";
     }
-    
-    if(!smoothLines){
-        cvs.loadPixels();
-        for (let i = 0; i < cvs.pixels.length; i += 4) {
-            cvs.pixels[i+3] = (cvs.pixels[i+3] > 127) ? 255 : 0;
-        }
-        cvs.updatePixels();
-    }
-
-    loadPixels();
-    configGraphics();
-    currentCurve.loadPixels();
-    while(pixStack.length > 0){
-        let pix = pixStack.pop();
-        let searchLeft = false;
-        let searchRight = false;
-        
-        while(pix.y >= 0){
-            pix.y--;
-            let ppos = (pix.y*cnv.width+pix.x) * 4;
-            let cc = [pixels[ppos], pixels[ppos+1], pixels[ppos+2]];
-            if(!matchColors(cc, startColor)){
-                break;
-            }
-        }
-        
-        while(pix.y < cnv.height){
-            pix.y++;
-            let ppos = (pix.y*cnv.width+pix.x) * 4;
-            let cc = [pixels[ppos], pixels[ppos+1], pixels[ppos+2]];
-            if(!matchColors(cc, startColor)){
-                pix.y--;
-                break;
-            }
-            
-            pixels[ppos] = newColor[0];
-            pixels[ppos+1] = newColor[1];
-            pixels[ppos+2] = newColor[2];
-            pixels[ppos+3] = 255;
-            
-            currentCurve.pixels[ppos] = newColor[0];
-            currentCurve.pixels[ppos+1] = newColor[1];
-            currentCurve.pixels[ppos+2] = newColor[2];
-            currentCurve.pixels[ppos+3] = 255;
-            
-            if(pix.x > 0){
-                ppos = (pix.y*cnv.width+pix.x-1) * 4;
-                cc = [pixels[ppos], pixels[ppos+1], pixels[ppos+2]];
-                if(matchColors(cc, startColor)){
-                    if(!searchLeft){
-                        pixStack.push({x:pix.x-1, y:pix.y});
-                        searchLeft = true;
-                    }
-                }
-                else if(searchLeft){
-                    searchLeft = false;
-                }
-            }
-
-            if(pix.x < cnv.width - 1){
-                ppos = (pix.y*cnv.width+pix.x+1) * 4;
-                cc = [pixels[ppos], pixels[ppos+1], pixels[ppos+2]];
-                if(matchColors(cc, startColor)){
-                    if(!searchRight){
-                        pixStack.push({x:pix.x+1, y:pix.y});
-                        searchRight = true;
-                    }
-                }
-                else if(searchRight){
-                    searchRight = false;
-                }
-            }
-        }
-    }
-    currentCurve.updatePixels();
-    curves.push(currentCurve);
-    currentCurve.remove();
-    updatePixels();
 }
 
-function matchColors(firstColor, secondColor){
-    return (firstColor[0] == secondColor[0] && firstColor[1] == secondColor[1] && firstColor[2] == secondColor[2]);
+function undo(){
+    mandala.undo();
+    clear();
+    image(mandala.canvas, 0, 0);
+}
+
+function restart(){
+    mandala.restart();
+    cnv.clear();
+    image(mandala.canvas, 0, 0);
+}
+
+function sections(sect){
+    mandala.setSections(sect);
+    cnv.clear();
+    image(mandala.canvas, 0, 0);
 }
