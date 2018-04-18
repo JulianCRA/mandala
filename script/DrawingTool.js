@@ -38,6 +38,7 @@ class DrawingTool{
         if(this.matchColors(startColor, newColor)){
             return false;
         }
+
         let pixStack = [{x:xpos, y:ypos}];
         let placeHolder = createGraphics(this.canvas.width, this.canvas.height);
         placeHolder.loadPixels();
@@ -109,7 +110,9 @@ class DrawingTool{
         this.drawing.addLayer(placeHolder, 1);
         this.refresh();
         placeHolder.remove();
+        placeHolder = null;
         dr.remove();
+        dr = null;
     }
 
     drawGuides(){
@@ -180,10 +183,13 @@ class DrawingTool{
         this.drawing.addLayer(placeHolder, 1);
         this.refresh();
         placeHolder.remove();
+        placeHolder = null;
     }
 
     restart(){
         this.canvas.clear();
+        while(this.drawing.layers.length > 0)
+            this.drawing.removeLast();
         this.drawing = new Drawing();
         this.points = [];
         this.refresh();
@@ -210,11 +216,12 @@ class DrawingTool{
         let tmp = this.drawing.drawAll(this.canvas.width, this.canvas.height);
         this.canvas.image(tmp, 0, 0);
         tmp.remove();
-
+        tmp = null;
         if(this.showguides){
             tmp = this.drawGuides();
             this.canvas.image(tmp, 0, 0);
             tmp.remove();
+            tmp = null;
         }
     }
 }

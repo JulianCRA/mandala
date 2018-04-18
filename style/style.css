@@ -2,6 +2,8 @@ body{
     background: #000000;
     margin: 0;
     padding: 0;
+    overflow-x: hidden;
+    overflow-y: hidden;
 }
 
 #mandala{
@@ -12,14 +14,16 @@ body{
 
 #controls{
     position: absolute;
-    background: #ffffff70;
+    background: #ffffff42;
     height: 100%;
     width: 250;
     overflow-x: hidden;
+    overflow-y: hidden;
     transition: 0.5s;
     transition-timing-function: ease-out;
     margin: 0;
-    padding: 0;
+    padding-left: 0px;
+    padding-top: 100px;
     left: -250px;
 }
 
@@ -69,4 +73,127 @@ body{
 }
 #savebtn{
     background: url('../img/savebtn.png') center no-repeat;
+}
+
+input[type=range] {
+    height: 35px;
+    -webkit-appearance: none;
+    margin-left: 10px;
+    width: 230px;
+    background: transparent;
+}
+
+input[type=range]:focus {
+    outline: none;
+}
+
+input[type=range]::-webkit-slider-runnable-track {
+    width: 100%;
+    height: 20px;
+    cursor: pointer;
+    transition: 0.2s;
+    box-shadow: 0px 0px 0px #000000;
+    background: #000000;
+    border-radius: 7px;
+    border: 0px solid #000000;
+}
+
+input[type=range]::-webkit-slider-thumb {
+    box-shadow: 0px 0px 0px #000000;
+    border: 0px solid #645C66;
+    height: 28px;
+    width: 40px;
+    border-radius: 7px;
+    background: #FFFFFF;
+    cursor: pointer;
+    -webkit-appearance: none;
+    margin-top: -4.5px;
+}
+
+input[type=range]:focus::-webkit-slider-runnable-track {
+    background: #000000;
+}
+
+input[type=range]::-moz-range-track {
+    width: 100%;
+    height: 20px;
+    cursor: pointer;
+    transition: 0.2s;
+    box-shadow: 0px 0px 0px #000000;
+    background: #000000;
+    border-radius: 7px;
+    border: 0px solid #000000;
+}
+
+input[type=range]::-moz-range-thumb {
+    box-shadow: 0px 0px 0px #000000;
+    border: 0px solid #645C66;
+    height: 28px;
+    width: 40px;
+    border-radius: 7px;
+    background: #FFFFFF;
+    cursor: pointer;
+}
+
+input[type=range]::-ms-track {
+    width: 100%;
+    height: 20px;
+    cursor: pointer;
+    transition: 0.2s;
+    background: transparent;
+    border-color: transparent;
+    color: transparent;
+}
+
+input[type=range]::-ms-fill-lower {
+    background: #000000;
+    border: 0px solid #000000;
+    border-radius: 14px;
+    box-shadow: 0px 0px 0px #000000;
+}
+
+input[type=range]::-ms-fill-upper {
+    background: #000000;
+    border: 0px solid #000000;
+    border-radius: 14px;
+    box-shadow: 0px 0px 0px #000000;
+}
+
+input[type=range]::-ms-thumb {
+    margin-top: 1px;
+    box-shadow: 0px 0px 0px #000000;
+    border: 0px solid #645C66;
+    height: 28px;
+    width: 40px;
+    border-radius: 7px;
+    background: #FFFFFF;
+    cursor: pointer;
+}
+
+input[type=range]:focus::-ms-fill-lower {
+    background: #000000;
+}
+
+input[type=range]:focus::-ms-fill-upper {
+    background: #000000;
+}
+
+.colorp{
+    background: #000000;
+    width: 230px;
+    border: 0px;
+    margin-left: 10px;
+    padding: 0px;
+    box-shadow: 0px;
+    border-radius: 7px;
+    outline: 0px;
+}
+
+.csampler{
+    position: relative;
+    width: 45px;
+    height: 211px;
+    background: #000;
+    display: block;
+    margin-left:200px;
 }

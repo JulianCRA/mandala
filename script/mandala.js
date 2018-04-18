@@ -1,4 +1,44 @@
 /*jshint esversion: 6 */
+p5.Graphics.prototype.remove = function() {
+    if (this.elt.parentNode) {
+      this.elt.parentNode.removeChild(this.elt);
+    }
+    var idx = this._pInst._elements.indexOf(this);
+    if (idx !== -1) {
+      this._pInst._elements.splice(idx, 1);
+    }
+    for (var elt_ev in this._events) {
+      this.elt.removeEventListener(elt_ev, this._events[elt_ev]);
+    }
+};
+
+$(document).ready(function() {
+    
+    $("#colorpicker").spectrum({
+        color: tinycolor,
+        flat: true,
+        move: function(color) {
+            previewColor(color.toHexString());
+        },
+        showPalette: true,
+        showSelectionPalette: true,
+        maxSelectionSize: 9,
+        showButtons: false,
+        containerClassName: 'colorp'
+    });
+    
+    $("#colorpicker").on('dragstop.spectrum', function(e, tinycolor) { 
+            setColor(tinycolor);
+            return false;
+        });
+
+});
+
+function previewColor(c){
+    $(".csampler").css("background-color", c);
+    //$("#controls").css("background-color", c);
+}
+
 const FREEHAND = 0;
 const BUCKET = 1;
 
@@ -6,6 +46,7 @@ let mandala;
 let cnv;
 let currentlyDrawing;
 let mode;
+let selectedColor;
 
 function setup(){
     initSketch(32);
@@ -31,7 +72,7 @@ function initSketch(s){
 }
 
 function bucketFill(){
-    mandala.bucketPaint(mouseX, mouseY);
+    mandala.bucketPaint(mouseX, mouseY, selectedColor);
     clear();
     image(mandala.canvas, 0, 0);
 }
@@ -121,4 +162,9 @@ function sections(sect){
     mandala.setSections(sect);
     cnv.clear();
     image(mandala.canvas, 0, 0);
+}
+
+function setColor(c){
+    mode = BUCKET;
+    selectedColor = [Math.round(c._r), Math.round(c._g), Math.round(c._b)];
 }
