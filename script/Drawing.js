@@ -73,14 +73,14 @@ class Drawing{
     }
 
     addLayer(layer, type = 0){
-        this.layers.push({graphics:layer, type:type});
+        this.layers.push({graphics:layer.get(), type:type});
     }
 
     removeLast(){
         if(this.layers.length <= 0) return;
         
         let x = this.layers.pop();
-        x.graphics.remove();
+        //x.graphics.remove();
         x.graphics = null;
         x = null;
     }
