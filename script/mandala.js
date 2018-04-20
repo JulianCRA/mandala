@@ -15,10 +15,13 @@ p5.Graphics.prototype.remove = function() {
 $(document).ready(function() {
     
     $("#colorpicker").spectrum({
-        color: tinycolor,
+        color: 'white',
         flat: true,
-        move: function(color) {
-            previewColor(color.toHexString());
+        move: function() {
+            previewColor();
+        },
+        change: function(color){
+            setColor(color);
         },
         showPalette: true,
         showSelectionPalette: true,
@@ -29,24 +32,24 @@ $(document).ready(function() {
     
     $("#colorpicker").on('dragstop.spectrum', function(e, tinycolor) { 
             setColor(tinycolor);
-            return false;
-        });
-
+        }
+    );
+    previewColor();
 });
 
-function previewColor(c){
-    $(".csampler").css("background-color", c);
-    //$("#controls").css("background-color", c);
+function previewColor(){
+    $(".csampler").css("background-color", $("#colorpicker").spectrum("get").toHexString());
+    
 }
-
 const FREEHAND = 0;
 const BUCKET = 1;
+const STRAIGHT = 2;
 
 let mandala;
 let cnv;
 let currentlyDrawing;
 let mode;
-let selectedColor;
+let ph;
 
 function setup(){
     initSketch(32);
@@ -65,14 +68,14 @@ function initSketch(s){
     cnv.mouseMoved(moved);
     cnv.mouseReleased(released);
     currentlyDrawing = false;
-    mode = FREEHAND;
+    mode = STRAIGHT;
 
     mandala = new DrawingTool(cnv.width, cnv.height, s);
     image(mandala.canvas, 0, 0);
 }
 
 function bucketFill(){
-    mandala.bucketPaint(mouseX, mouseY, selectedColor);
+    mandala.bucketPaint(mouseX, mouseY);
     clear();
     image(mandala.canvas, 0, 0);
 }
@@ -80,8 +83,13 @@ function bucketFill(){
 function pressed(){
     switch(mode){
         case FREEHAND:
-            currentlyDrawing = true;        
+            currentlyDrawing = true;
             mandala.addPoint(mouseX, mouseY, currentlyDrawing);
+        break;
+        case STRAIGHT:
+            currentlyDrawing = true;
+            mandala.addPoint(mouseX, mouseY, currentlyDrawing);
+            mandala.addPoint(mouseX, mouseY);
         break;
     }
 }
@@ -94,6 +102,14 @@ function moved(){
                 mandala.drawCurve(cnv);
             }
         break;
+        case STRAIGHT:
+            if(currentlyDrawing){
+                mandala.addPoint(mouseX, mouseY);
+                clear();
+                image(mandala.canvas, 0, 0);
+                mandala.drawStraightLine(cnv);
+            }
+        break;
     }
 }
 
@@ -101,12 +117,18 @@ function released(){
     switch(mode){
         case FREEHAND:
             currentlyDrawing = false;
-            mandala.addPoint(mouseX, mouseY, currentlyDrawing);
+            mandala.addPoint(mouseX, mouseY, currentlyDrawing, FREEHAND);
             clear();
             image(mandala.canvas, 0, 0);
         break;
         case BUCKET:
             bucketFill();
+        break;
+        case STRAIGHT:
+            currentlyDrawing = false;
+            mandala.addPoint(mouseX, mouseY, currentlyDrawing, STRAIGHT);
+            clear();
+            image(mandala.canvas, 0, 0);
         break;
     }
 }
@@ -131,6 +153,9 @@ function keyReleased(){
     if(keyCode == CONTROL){
         ctrl = false;
     }
+    else if(keyCode == TAB){
+        slideToolsMenu();
+    }
 }
 
 let isMenuActive = false;
@@ -154,6 +179,8 @@ function undo(){
 
 function restart(){
     mandala.restart();
+    $("#colorpicker").spectrum("set", "white");
+    previewColor();
     cnv.clear();
     image(mandala.canvas, 0, 0);
 }
@@ -164,7 +191,11 @@ function sections(sect){
     image(mandala.canvas, 0, 0);
 }
 
+function sampleSize(v){
+    mandala.sampleSize = v / 100;
+}
+
 function setColor(c){
-    mode = BUCKET;
-    selectedColor = [Math.round(c._r), Math.round(c._g), Math.round(c._b)];
+    cnv.stroke(color(Math.round(c._r*0.6),Math.round(c._g*0.6),Math.round(c._b*0.6)));
+    mandala.currentColor = [Math.round(c._r), Math.round(c._g), Math.round(c._b)];
 }

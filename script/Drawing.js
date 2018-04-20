@@ -42,8 +42,9 @@ class Drawing{
 
     drawFromArray(w, h, list){
         let placeHolder = createGraphics(w, h);
-        for(let i = 0; i < list.length; i++)
+        for(let i = 0; i < list.length; i++){
             placeHolder.image(list[i], 0, 0);
+        }
         return(placeHolder);
     }
 

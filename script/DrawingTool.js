@@ -13,6 +13,7 @@ class DrawingTool{
         this.xOff = width * 0.5;
         this.yOff = height * 0.5;
         this.sampleSize = 0.15;
+        this.currentColor = [255, 255, 255];
 
         this.refresh();
     }
@@ -32,7 +33,7 @@ class DrawingTool{
         return (firstColor[0] == secondColor[0] && firstColor[1] == secondColor[1] && firstColor[2] == secondColor[2]);
     }
 
-    bucketPaint(xpos, ypos, newColor = [random(255),random(255),random(255)]){
+    bucketPaint(xpos, ypos, newColor = this.currentColor){
         let dr = this.drawing.drawAll(this.canvas.width, this.canvas.height);
         let startColor = dr.get(xpos, ypos);
         if(this.matchColors(startColor, newColor)){
@@ -129,6 +130,8 @@ class DrawingTool{
     }
 
     drawCurve(container){
+        container.clear;
+        container.image(this.canvas, 0, 0);
         container.push();
         container.translate(this.xOff, this.yOff);
         for(let s = 0; s < this.sections; s++){
@@ -145,7 +148,7 @@ class DrawingTool{
     }
     correctCurve(samples = this.points){
         let placeHolder = createGraphics(this.canvas.width, this.canvas.height);
-        placeHolder.stroke(255);
+        placeHolder.stroke(this.currentColor);
         placeHolder.strokeWeight(3);
         placeHolder.strokeCap(ROUND);
         placeHolder.strokeJoin(ROUND);
@@ -186,22 +189,59 @@ class DrawingTool{
         placeHolder = null;
     }
 
+    drawStraightLine(container){
+        container.push();
+        container.translate(this.xOff, this.yOff);
+        for(let s = 0; s < this.sections; s++){
+            container.push();
+            container.rotate(s * this.rotationIncrement);
+            if(this.reflect && s%2 != 0){
+                container.rotate(this.rotationIncrement);
+                container.scale(1.0, -1.0);;
+            }
+            container.line(this.points[0].x,this.points[0].y,this.points[this.points.length-1].x, this.points[this.points.length-1].y);
+            container.pop();
+        }
+        container.pop();
+    }
+
+    addStraightLine(){
+        let placeHolder = createGraphics(this.canvas.width, this.canvas.height);
+        placeHolder.stroke(this.currentColor);
+        placeHolder.strokeWeight(3);
+        placeHolder.strokeCap(ROUND);
+        this.drawStraightLine(placeHolder);
+        this.drawing.addLayer(placeHolder, 1);
+        this.refresh();
+        placeHolder.remove();
+        placeHolder = null;
+    }
+
     restart(){
         this.canvas.clear();
         while(this.drawing.layers.length > 0)
             this.drawing.removeLast();
         this.drawing = new Drawing();
         this.points = [];
+        this.currentColor = [255, 255, 255];
         this.refresh();
     }
 
-    addPoint(mx, my, start){
+    addPoint(mx, my, start, mode = 0){
         if(start == true){
             this.points = [];
         }
         this.points.push({x:mx - this.xOff, y:my - this.yOff});
         if(start == false){
-            this.addCurve();
+            switch(mode){
+                case 0:
+                    this.addCurve();
+                break;
+                case 2:
+                    this.addStraightLine();
+                break;
+            }
+            
         }
     }
 
@@ -212,7 +252,7 @@ class DrawingTool{
 
     refresh(){
         this.canvas.clear();
-        
+
         let tmp = this.drawing.drawAll(this.canvas.width, this.canvas.height);
         this.canvas.image(tmp, 0, 0);
         tmp.remove();

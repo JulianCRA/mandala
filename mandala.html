@@ -1,6 +1,6 @@
 <html>
     <head>
-        <script src="script/jquery-3.3.1.min.js"></script>
+        <script src="script/jquery-3.3.1.slim.min.js"></script>
         <script src='script/spectrum.js'></script>
         <link rel='stylesheet' href='style/spectrum.css' />
 
@@ -14,12 +14,12 @@
         <div id = "mandala"></div>
         
         <div id="controls">
-            <input type="range" min="2" max="128" step="2" oninput="sections(this.value)">
+            <input type="range" value="32" min="2" max="128" step="2" oninput="sections(this.value)">
             <div>
                 <input type="text" id="colorpicker">
                 <div id="csampler"></div>
             </div>
-            
+            <input type="range" value="15" min="2" max="100" step="1" oninput="sampleSize(this.value)">
         </div>
         <div id="quickaccess">
             <button id="togglemenubtn" class="tools-button" onclick="slideToolsMenu()"></button>

@@ -862,8 +862,8 @@
         function updateOriginalInput(fireCallback) {
             var color = get(),
                 displayColor = '',
-                hasChanged = !tinycolor.equals(color, colorOnShow);
-
+                hasChanged = true;//!tinycolor.equals(color, colorOnShow);
+            
             if (color) {
                 displayColor = color.toString(currentPreferredFormat);
                 // Update the selection palette with the current color
