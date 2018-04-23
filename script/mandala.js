@@ -68,8 +68,8 @@ function initSketch(s){
     cnv.mouseMoved(moved);
     cnv.mouseReleased(released);
     currentlyDrawing = false;
-    mode = STRAIGHT;
-
+    setMode(FREEHAND);
+    
     mandala = new DrawingTool(cnv.width, cnv.height, s);
     image(mandala.canvas, 0, 0);
 }
@@ -143,7 +143,7 @@ function keyPressed(){
             undo();
         }
         else if (keyCode == 83) {
-            //saveDrawing();
+            saveDrawing();
         }
     }
     return false;
@@ -186,16 +186,38 @@ function restart(){
 }
 
 function sections(sect){
+    document.getElementById("sections-label").innerText = sect + " sections";
     mandala.setSections(sect);
     cnv.clear();
     image(mandala.canvas, 0, 0);
 }
 
+function showGuides(){
+    mandala.toggleShowGuides();
+    cnv.clear();
+    image(mandala.canvas, 0, 0);
+}
+
+function showLines(){
+    mandala.linesOnly();
+    cnv.clear();
+    image(mandala.canvas, 0, 0);
+}
+
 function sampleSize(v){
+    document.getElementById("correction-label").innerText = v + "% stroke accuracy";
     mandala.sampleSize = v / 100;
+}
+
+function setMode(m){
+    mode = m;
 }
 
 function setColor(c){
     cnv.stroke(color(Math.round(c._r*0.6),Math.round(c._g*0.6),Math.round(c._b*0.6)));
     mandala.currentColor = [Math.round(c._r), Math.round(c._g), Math.round(c._b)];
+}
+
+function saveDrawing(){
+    save(cnv, "mandala.png");
 }

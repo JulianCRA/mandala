@@ -14,18 +14,28 @@
         <div id = "mandala"></div>
         
         <div id="controls">
-            <input type="range" value="32" min="2" max="128" step="2" oninput="sections(this.value)">
-            <div>
+            
+            <div id="modecontrols">
                 <input type="text" id="colorpicker">
                 <div id="csampler"></div>
+                <div id="modes">
+                    <input id = "fhb" type="radio" class="tools-button mode-input" onclick="setMode(FREEHAND)" name="moderb" checked/>
+                    <input id = "slb" type="radio" class="tools-button mode-input" onclick="setMode(STRAIGHT)" name="moderb"/>
+                    <input id = "bfb" type="radio" class="tools-button mode-input" onclick="setMode(BUCKET)" name="moderb"/>
+                </div>
             </div>
-            <input type="range" value="15" min="2" max="100" step="1" oninput="sampleSize(this.value)">
+            
+            <label class="property" id="sections-label">32 sections</label>
+            <input type="range" value="32" min="2" max="128" step="2" oninput="sections(this.value)">
+            <label class="property" id="correction-label"> 15% stroke accuracy</label>
+            <input type="range" value="15" min="5" max="50" step="1" oninput="sampleSize(this.value)">
+            
         </div>
         <div id="quickaccess">
             <button id="togglemenubtn" class="tools-button" onclick="slideToolsMenu()"></button>
             <button id="undobtn" class="tools-button" onclick="undo()"></button>
             <button id="deletebtn" class="tools-button" onclick="restart()"></button>
-            <button id="savebtn" class="tools-button" onclick="save()"></button>
+            <button id="savebtn" class="tools-button" onclick="saveDrawing()"></button>
         </div>
     </body>
 </html>

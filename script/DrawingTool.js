@@ -18,6 +18,11 @@ class DrawingTool{
         this.refresh();
     }
 
+    toggleShowGuides(){
+        this.showguides = !this.showguides;
+        this.refresh();
+    }
+
     setSections(s){
         if(s === undefined) return this.sections;
 
@@ -44,7 +49,7 @@ class DrawingTool{
         let placeHolder = createGraphics(this.canvas.width, this.canvas.height);
         placeHolder.loadPixels();
         dr.loadPixels();
-        
+        let c = 0;
         while(pixStack.length > 0){
             let pix = pixStack.pop();
             let searchLeft = false;
@@ -105,10 +110,12 @@ class DrawingTool{
                         searchRight = false;
                     }
                 }
+                c++;
             }
         }
+        console.log(c);
         placeHolder.updatePixels();
-        this.drawing.addLayer(placeHolder, 1);
+        this.drawing.addLayer(placeHolder, 0);
         this.refresh();
         placeHolder.remove();
         placeHolder = null;
@@ -126,6 +133,13 @@ class DrawingTool{
             placeHolder.rotate(this.rotationIncrement);
             placeHolder.line(80, 0, this.canvas.width * 2, 0);
         }
+        placeHolder.noFill();
+        if(this.canvas.width > this.canvas.height)
+            placeHolder.rect(-this.yOff, -this.yOff, this.yOff * 2, this.yOff * 2);
+        else
+            placeHolder.rect(-this.xOff, -this.xOff, this.xOff * 2, this.xOff * 2);
+        (this.xOff>this.yOff)?placeHolder.ellipse(0,0,2*this.yOff,2*this.yOff):placeHolder.ellipse(0,0,2*this.xOff,2*this.xOff);
+        
         return(placeHolder);
     }
 
@@ -254,6 +268,21 @@ class DrawingTool{
         this.canvas.clear();
 
         let tmp = this.drawing.drawAll(this.canvas.width, this.canvas.height);
+        this.canvas.image(tmp, 0, 0);
+        tmp.remove();
+        tmp = null;
+        if(this.showguides){
+            tmp = this.drawGuides();
+            this.canvas.image(tmp, 0, 0);
+            tmp.remove();
+            tmp = null;
+        }
+    }
+
+    linesOnly(){
+        this.canvas.clear();
+        
+        let tmp = this.drawing.drawCurves(this.canvas.width, this.canvas.height);
         this.canvas.image(tmp, 0, 0);
         tmp.remove();
         tmp = null;
