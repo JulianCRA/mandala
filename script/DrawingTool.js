@@ -7,6 +7,7 @@ class DrawingTool{
 
         this.showguides = showguides;
         this.reflect = true;
+        this.smoothlines = true;
         
         this.sections = sections;
         this.rotationIncrement = Math.PI * 2 / this.sections;
@@ -35,6 +36,7 @@ class DrawingTool{
     }
 
     matchColors(firstColor, secondColor){
+        
         return (firstColor[0] == secondColor[0] && firstColor[1] == secondColor[1] && firstColor[2] == secondColor[2]);
     }
 
@@ -49,7 +51,7 @@ class DrawingTool{
         let placeHolder = createGraphics(this.canvas.width, this.canvas.height);
         placeHolder.loadPixels();
         dr.loadPixels();
-        let c = 0;
+        
         while(pixStack.length > 0){
             let pix = pixStack.pop();
             let searchLeft = false;
@@ -110,10 +112,8 @@ class DrawingTool{
                         searchRight = false;
                     }
                 }
-                c++;
             }
         }
-        console.log(c);
         placeHolder.updatePixels();
         this.drawing.addLayer(placeHolder, 0);
         this.refresh();
@@ -127,13 +127,14 @@ class DrawingTool{
         let placeHolder = createGraphics(this.canvas.width, this.canvas.height);
         placeHolder.translate(this.xOff, this.yOff);
         placeHolder.stroke(color(170,170,170,50));
-        placeHolder.strokeWeight(2);
+        placeHolder.strokeWeight(1);
 
         for(let s = 0; s < this.sections; s++){
             placeHolder.rotate(this.rotationIncrement);
             placeHolder.line(80, 0, this.canvas.width * 2, 0);
         }
         placeHolder.noFill();
+        placeHolder.strokeWeight(0.7);
         if(this.canvas.width > this.canvas.height)
             placeHolder.rect(-this.yOff, -this.yOff, this.yOff * 2, this.yOff * 2);
         else
@@ -292,5 +293,13 @@ class DrawingTool{
             tmp.remove();
             tmp = null;
         }
+    }
+
+    unSmooth(container){
+        container.loadPixels();
+        for (let i = 0; i < container.pixels.length; i += 4) 
+            if(container.pixels[i+3] != 0)
+                container.pixels[i+3] = 255;
+        container.updatePixels();
     }
 }

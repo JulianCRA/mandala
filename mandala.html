@@ -24,12 +24,31 @@
                     <input id = "bfb" type="radio" class="tools-button mode-input" onclick="setMode(BUCKET)" name="moderb"/>
                 </div>
             </div>
-            
-            <label class="property" id="sections-label">32 sections</label>
-            <input type="range" value="32" min="2" max="128" step="2" oninput="sections(this.value)">
-            <label class="property" id="correction-label"> 15% stroke accuracy</label>
-            <input type="range" value="15" min="5" max="50" step="1" oninput="sampleSize(this.value)">
-            
+
+            <div class="property property-slider" >
+                <label id="sections-label">32 sections</label>
+                <input type="range" value="32" min="2" max="128" step="2" oninput="sections(this.value)">
+            </div>
+            <div class="property property-slider">
+                <label id="correction-label"> 15% stroke accuracy</label>
+                <input type="range" value="15" min="5" max="50" step="1" oninput="sampleSize(this.value)">
+            </div>
+            <div class="property property-check">
+                <label id="reflect-label"> Reflect strokes</label>
+                <input type="checkbox" class="toggle-property" onchange="reflect(this.checked)" checked>
+            </div>
+            <div class="property property-check">
+                <label id="guides-label"> Show guides</label>
+                <input type="checkbox" class="toggle-property" onchange="showGuides()" checked>
+            </div>
+            <div class="property property-check">
+                <label id="guides-label"> Show lines only</label>
+                <input type="checkbox" class="toggle-property" onchange="showLines(this.checked)">
+            </div>
+            <div class="property property-check">
+                <label id="smooth-label"> Smooth lines</label>
+                <input type="checkbox" class="toggle-property" onchange="smoothLines(this.checked)" checked>
+            </div>
         </div>
         <div id="quickaccess">
             <button id="togglemenubtn" class="tools-button" onclick="slideToolsMenu()"></button>

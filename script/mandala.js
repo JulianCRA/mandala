@@ -27,7 +27,8 @@ $(document).ready(function() {
         showSelectionPalette: true,
         maxSelectionSize: 9,
         showButtons: false,
-        containerClassName: 'colorp'
+        containerClassName: 'colorp',
+        //clickoutFiresChange: false
     });
     
     $("#colorpicker").on('dragstop.spectrum', function(e, tinycolor) { 
@@ -74,11 +75,6 @@ function initSketch(s){
     image(mandala.canvas, 0, 0);
 }
 
-function bucketFill(){
-    mandala.bucketPaint(mouseX, mouseY);
-    clear();
-    image(mandala.canvas, 0, 0);
-}
 
 function pressed(){
     switch(mode){
@@ -171,6 +167,12 @@ function slideToolsMenu(){
     }
 }
 
+function bucketFill(){
+    mandala.bucketPaint(mouseX, mouseY);
+    clear();
+    image(mandala.canvas, 0, 0);
+}
+
 function undo(){
     mandala.undo();
     clear();
@@ -198,8 +200,8 @@ function showGuides(){
     image(mandala.canvas, 0, 0);
 }
 
-function showLines(){
-    mandala.linesOnly();
+function showLines(l){
+    l?mandala.linesOnly():mandala.refresh();
     cnv.clear();
     image(mandala.canvas, 0, 0);
 }
@@ -211,6 +213,17 @@ function sampleSize(v){
 
 function setMode(m){
     mode = m;
+}
+
+function reflect(r){
+    mandala.reflect = r;
+}
+
+function smoothLines(s){
+    mandala.smoothlines = s;
+    mandala.refresh();
+    cnv.clear();
+    image(mandala.canvas, 0, 0);
 }
 
 function setColor(c){

@@ -48,14 +48,6 @@ class Drawing{
         return(placeHolder);
     }
 
-    unSmooth(container){
-        container.loadPixels();
-        for (let i = 0; i < container.pixels.length; i += 4) 
-            if(container.pixels[i+3] != 0)
-                container.pixels[i+3] = 255;
-        container.updatePixels();
-    }
-
     regions(){
         let a = [];
         for(let i = 0; i < this.layers.length; i++)
