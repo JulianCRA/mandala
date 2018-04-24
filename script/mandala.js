@@ -72,7 +72,7 @@ function initSketch(s){
     setMode(FREEHAND);
     
     mandala = new DrawingTool(cnv.width, cnv.height, s);
-    image(mandala.canvas, 0, 0);
+    image(mandala.getCurrentCanvas(), 0, 0);
 }
 
 
@@ -102,7 +102,7 @@ function moved(){
             if(currentlyDrawing){
                 mandala.addPoint(mouseX, mouseY);
                 clear();
-                image(mandala.canvas, 0, 0);
+                image(mandala.getCurrentCanvas(), 0, 0);
                 mandala.drawStraightLine(cnv);
             }
         break;
@@ -115,7 +115,7 @@ function released(){
             currentlyDrawing = false;
             mandala.addPoint(mouseX, mouseY, currentlyDrawing, FREEHAND);
             clear();
-            image(mandala.canvas, 0, 0);
+            image(mandala.getCurrentCanvas(), 0, 0);
         break;
         case BUCKET:
             bucketFill();
@@ -124,7 +124,7 @@ function released(){
             currentlyDrawing = false;
             mandala.addPoint(mouseX, mouseY, currentlyDrawing, STRAIGHT);
             clear();
-            image(mandala.canvas, 0, 0);
+            image(mandala.getCurrentCanvas(), 0, 0);
         break;
     }
 }
@@ -170,40 +170,46 @@ function slideToolsMenu(){
 function bucketFill(){
     mandala.bucketPaint(mouseX, mouseY);
     clear();
-    image(mandala.canvas, 0, 0);
+    image(mandala.getCurrentCanvas(), 0, 0);
 }
 
 function undo(){
     mandala.undo();
     clear();
-    image(mandala.canvas, 0, 0);
+    image(mandala.getCurrentCanvas(), 0, 0);
 }
 
 function restart(){
     mandala.restart();
     $("#colorpicker").spectrum("set", "white");
     previewColor();
-    cnv.clear();
-    image(mandala.canvas, 0, 0);
+    clear();
+    image(mandala.getCurrentCanvas(), 0, 0);
 }
 
 function sections(sect){
     document.getElementById("sections-label").innerText = sect + " sections";
     mandala.setSections(sect);
-    cnv.clear();
-    image(mandala.canvas, 0, 0);
+    clear();
+    image(mandala.getCurrentCanvas(), 0, 0);
 }
 
 function showGuides(){
     mandala.toggleShowGuides();
-    cnv.clear();
-    image(mandala.canvas, 0, 0);
+    clear();
+    image(mandala.getCurrentCanvas(), 0, 0);
 }
 
-function showLines(l){
-    l?mandala.linesOnly():mandala.refresh();
-    cnv.clear();
-    image(mandala.canvas, 0, 0);
+function hideRegions(l){
+    mandala.linesOnly(l);
+    clear();
+    image(mandala.getCurrentCanvas(), 0, 0);
+}
+
+function hideLines(r){
+    mandala.regionsOnly(r);
+    clear();
+    image(mandala.getCurrentCanvas(), 0, 0);
 }
 
 function sampleSize(v){
@@ -221,9 +227,8 @@ function reflect(r){
 
 function smoothLines(s){
     mandala.smoothlines = s;
-    mandala.refresh();
     cnv.clear();
-    image(mandala.canvas, 0, 0);
+    image(mandala.getCurrentCanvas(), 0, 0);
 }
 
 function setColor(c){

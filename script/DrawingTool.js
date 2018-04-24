@@ -8,6 +8,8 @@ class DrawingTool{
         this.showguides = showguides;
         this.reflect = true;
         this.smoothlines = true;
+        this.showcurves = true;
+        this.showregions = true;
         
         this.sections = sections;
         this.rotationIncrement = Math.PI * 2 / this.sections;
@@ -15,28 +17,56 @@ class DrawingTool{
         this.yOff = height * 0.5;
         this.sampleSize = 0.15;
         this.currentColor = [255, 255, 255];
+    }
 
-        this.refresh();
+    getCurrentCanvas(){
+        this.canvas.clear();
+        
+        if(this.showregions){
+            let tmp = this.drawing.drawRegions(this.canvas.width, this.canvas.height);
+            this.canvas.image(tmp, 0, 0);
+            tmp.remove();
+            tmp = null;
+        }
+
+        if(this.showcurves){
+            let tmp = this.drawing.drawCurves(this.canvas.width, this.canvas.height);
+            if(!this.smoothlines){
+                tmp.loadPixels();
+                for (let i = 0; i < tmp.pixels.length; i += 4) 
+                    if(tmp.pixels[i+3] != 0)
+                        tmp.pixels[i+3] = 255;
+                tmp.updatePixels();
+            }
+            this.canvas.image(tmp, 0, 0);
+            tmp.remove();
+            tmp = null;
+        }
+
+        if(this.showguides){
+            let tmp = this.drawGuides();
+            this.canvas.image(tmp, 0, 0);
+            tmp.remove();
+            tmp = null;
+        }
+
+        return this.canvas.get();
     }
 
     toggleShowGuides(){
         this.showguides = !this.showguides;
-        this.refresh();
+    }
+
+    toggleSmoothLines(){
+        this.smoothlines = !this.smoothlines;
     }
 
     setSections(s){
-        if(s === undefined) return this.sections;
-
         this.sections = s;
         this.rotationIncrement = Math.PI * 2 / this.sections;
-
-        if(this.showguides){
-            this.refresh();
-        }
     }
 
     matchColors(firstColor, secondColor){
-        
         return (firstColor[0] == secondColor[0] && firstColor[1] == secondColor[1] && firstColor[2] == secondColor[2]);
     }
 
@@ -116,7 +146,6 @@ class DrawingTool{
         }
         placeHolder.updatePixels();
         this.drawing.addLayer(placeHolder, 0);
-        this.refresh();
         placeHolder.remove();
         placeHolder = null;
         dr.remove();
@@ -199,7 +228,6 @@ class DrawingTool{
         let placeHolder = this.correctCurve(samples);
         
         this.drawing.addLayer(placeHolder, 1);
-        this.refresh();
         placeHolder.remove();
         placeHolder = null;
     }
@@ -227,7 +255,6 @@ class DrawingTool{
         placeHolder.strokeCap(ROUND);
         this.drawStraightLine(placeHolder);
         this.drawing.addLayer(placeHolder, 1);
-        this.refresh();
         placeHolder.remove();
         placeHolder = null;
     }
@@ -238,8 +265,9 @@ class DrawingTool{
             this.drawing.removeLast();
         this.drawing = new Drawing();
         this.points = [];
+        this.showcurves = true;
+        this.showregions = true;
         this.currentColor = [255, 255, 255];
-        this.refresh();
     }
 
     addPoint(mx, my, start, mode = 0){
@@ -262,44 +290,13 @@ class DrawingTool{
 
     undo(){
         this.drawing.removeLast();
-        this.refresh();
     }
 
-    refresh(){
-        this.canvas.clear();
-
-        let tmp = this.drawing.drawAll(this.canvas.width, this.canvas.height);
-        this.canvas.image(tmp, 0, 0);
-        tmp.remove();
-        tmp = null;
-        if(this.showguides){
-            tmp = this.drawGuides();
-            this.canvas.image(tmp, 0, 0);
-            tmp.remove();
-            tmp = null;
-        }
+    linesOnly(linesonly){
+        this.showregions = !linesonly;
     }
 
-    linesOnly(){
-        this.canvas.clear();
-        
-        let tmp = this.drawing.drawCurves(this.canvas.width, this.canvas.height);
-        this.canvas.image(tmp, 0, 0);
-        tmp.remove();
-        tmp = null;
-        if(this.showguides){
-            tmp = this.drawGuides();
-            this.canvas.image(tmp, 0, 0);
-            tmp.remove();
-            tmp = null;
-        }
-    }
-
-    unSmooth(container){
-        container.loadPixels();
-        for (let i = 0; i < container.pixels.length; i += 4) 
-            if(container.pixels[i+3] != 0)
-                container.pixels[i+3] = 255;
-        container.updatePixels();
+    regionsOnly(regionsonly){
+        this.showcurves = !regionsonly;
     }
 }
