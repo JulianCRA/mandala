@@ -72,7 +72,6 @@ class Drawing{
         if(this.layers.length <= 0) return;
         
         let x = this.layers.pop();
-        //x.graphics.remove();
         x.graphics = null;
         x = null;
     }

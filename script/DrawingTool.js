@@ -21,7 +21,6 @@ class DrawingTool{
 
     getCurrentCanvas(){
         this.canvas.clear();
-        
         if(this.showregions){
             let tmp = this.drawing.drawRegions(this.canvas.width, this.canvas.height);
             this.canvas.image(tmp, 0, 0);
@@ -163,7 +162,7 @@ class DrawingTool{
             placeHolder.line(80, 0, this.canvas.width * 2, 0);
         }
         placeHolder.noFill();
-        placeHolder.strokeWeight(0.7);
+        placeHolder.strokeWeight(1);
         if(this.canvas.width > this.canvas.height)
             placeHolder.rect(-this.yOff, -this.yOff, this.yOff * 2, this.yOff * 2);
         else

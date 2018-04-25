@@ -28,7 +28,6 @@ $(document).ready(function() {
         maxSelectionSize: 9,
         showButtons: false,
         containerClassName: 'colorp',
-        //clickoutFiresChange: false
     });
     
     $("#colorpicker").on('dragstop.spectrum', function(e, tinycolor) { 
@@ -102,7 +101,7 @@ function moved(){
             if(currentlyDrawing){
                 mandala.addPoint(mouseX, mouseY);
                 clear();
-                image(mandala.getCurrentCanvas(), 0, 0);
+                image(mandala.canvas, 0, 0);
                 mandala.drawStraightLine(cnv);
             }
         break;
@@ -237,5 +236,5 @@ function setColor(c){
 }
 
 function saveDrawing(){
-    save(cnv, "mandala.png");
+    save(mandala.getCurrentCanvas(), "mandala.png");
 }
