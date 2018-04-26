@@ -1,4 +1,4 @@
-/*jshint esversion: 6 */
+'use strict';
 p5.Graphics.prototype.remove = function() {
     if (this.elt.parentNode) {
       this.elt.parentNode.removeChild(this.elt);
@@ -41,11 +41,13 @@ function previewColor(){
     $(".csampler").css("background-color", $("#colorpicker").spectrum("get").toHexString());
     
 }
-const FREEHAND = 0;
-const BUCKET = 1;
+
+const BUCKET = 0;
+const FREEHAND = 1;
 const STRAIGHT = 2;
 
 let mandala;
+let currentDrawing;
 let cnv;
 let currentlyDrawing;
 let mode;
@@ -70,21 +72,20 @@ function initSketch(s){
     currentlyDrawing = false;
     setMode(FREEHAND);
     
-    mandala = new DrawingTool(cnv.width, cnv.height, s);
-    image(mandala.getCurrentCanvas(), 0, 0);
+    currentDrawing = createGraphics(windowWidth, windowHeight);
+    mandala = new DrawingTool(currentDrawing, s);
+    update();
 }
-
 
 function pressed(){
     switch(mode){
         case FREEHAND:
             currentlyDrawing = true;
-            mandala.addPoint(mouseX, mouseY, currentlyDrawing);
+            mandala.beginCurve(mouseX, mouseY);
         break;
         case STRAIGHT:
             currentlyDrawing = true;
-            mandala.addPoint(mouseX, mouseY, currentlyDrawing);
-            mandala.addPoint(mouseX, mouseY);
+            mandala.beginCurve(mouseX, mouseY);
         break;
     }
 }
@@ -93,15 +94,14 @@ function moved(){
     switch(mode){
         case FREEHAND:
             if(currentlyDrawing){
-                mandala.addPoint(mouseX, mouseY);
+                mandala.addVertex(mouseX, mouseY);
                 mandala.drawCurve(cnv);
             }
         break;
         case STRAIGHT:
             if(currentlyDrawing){
-                mandala.addPoint(mouseX, mouseY);
-                clear();
-                image(mandala.canvas, 0, 0);
+                mandala.addVertex(mouseX, mouseY);
+                update();
                 mandala.drawStraightLine(cnv);
             }
         break;
@@ -112,20 +112,17 @@ function released(){
     switch(mode){
         case FREEHAND:
             currentlyDrawing = false;
-            mandala.addPoint(mouseX, mouseY, currentlyDrawing, FREEHAND);
-            clear();
-            image(mandala.getCurrentCanvas(), 0, 0);
+            mandala.endCurve(mouseX, mouseY, FREEHAND);
         break;
         case BUCKET:
             bucketFill();
         break;
         case STRAIGHT:
             currentlyDrawing = false;
-            mandala.addPoint(mouseX, mouseY, currentlyDrawing, STRAIGHT);
-            clear();
-            image(mandala.getCurrentCanvas(), 0, 0);
+            mandala.endCurve(mouseX, mouseY, STRAIGHT);
         break;
     }
+    update();
 }
 
 let ctrl = false;
@@ -141,7 +138,7 @@ function keyPressed(){
             saveDrawing();
         }
     }
-    return false;
+    //return false;
 }
 
 function keyReleased(){
@@ -166,49 +163,51 @@ function slideToolsMenu(){
     }
 }
 
-function bucketFill(){
-    mandala.bucketPaint(mouseX, mouseY);
+function update(){
     clear();
-    image(mandala.getCurrentCanvas(), 0, 0);
+    image(currentDrawing, 0, 0);
+}
+
+function bucketFill(){
+    mandala.fillArea(mouseX, mouseY);
 }
 
 function undo(){
     mandala.undo();
-    clear();
-    image(mandala.getCurrentCanvas(), 0, 0);
+    update();
 }
 
 function restart(){
     mandala.restart();
     $("#colorpicker").spectrum("set", "white");
     previewColor();
-    clear();
-    image(mandala.getCurrentCanvas(), 0, 0);
+    update();
 }
 
 function sections(sect){
     document.getElementById("sections-label").innerText = sect + " sections";
     mandala.setSections(sect);
-    clear();
-    image(mandala.getCurrentCanvas(), 0, 0);
+    update();
 }
 
-function showGuides(){
-    mandala.toggleShowGuides();
-    clear();
-    image(mandala.getCurrentCanvas(), 0, 0);
+function showGuides(g){
+    mandala.showGuides(g);
+    update();
+}
+
+function smoothLines(s){
+    mandala.smoothLines(s);
+    update();
 }
 
 function hideRegions(l){
     mandala.linesOnly(l);
-    clear();
-    image(mandala.getCurrentCanvas(), 0, 0);
+    update();
 }
 
 function hideLines(r){
     mandala.regionsOnly(r);
-    clear();
-    image(mandala.getCurrentCanvas(), 0, 0);
+    update();
 }
 
 function sampleSize(v){
@@ -224,15 +223,9 @@ function reflect(r){
     mandala.reflect = r;
 }
 
-function smoothLines(s){
-    mandala.smoothlines = s;
-    cnv.clear();
-    image(mandala.getCurrentCanvas(), 0, 0);
-}
-
 function setColor(c){
     cnv.stroke(color(Math.round(c._r*0.6),Math.round(c._g*0.6),Math.round(c._b*0.6)));
-    mandala.currentColor = [Math.round(c._r), Math.round(c._g), Math.round(c._b)];
+    mandala.currentColor = [Math.round(c._r), Math.round(c._g), Math.round(c._b), Math.round(c._a*255)];
 }
 
 function saveDrawing(){
