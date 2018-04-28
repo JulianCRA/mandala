@@ -5,6 +5,8 @@ class Drawing{
         this.width = width;
         this.height = height;
         this.layers = [];
+        this.buffer = [];
+        
         this.canvas = createGraphics(this.width, this.height);
         this.curves = createGraphics(this.width, this.height);
         this.regions = createGraphics(this.width, this.height);
@@ -17,8 +19,10 @@ class Drawing{
     }
 
     addLayer(layer, type = 1){
-        this.layers.push({graphics:layer, type:type});
+        this.layers.push({graphics:layer.drawingContext.canvas.toDataURL("image/png"), type:type});
+        this.buffer.push(this.canvas.drawingContext.canvas.toDataURL("image/png"));
         this.canvas.image(layer, 0, 0);
+        
         switch(type){
             case 0:
                 this.regions.image(layer, 0, 0);
@@ -27,12 +31,24 @@ class Drawing{
                 this.curves.image(layer, 0, 0);
                 break;
         }
+        layer = null;
     }
 
-    updateCanvas(){
+    updateCanvas(callback){
         this.canvas.clear();
-        for(let i = 0; i < this.layers.length; i++)
-            this.canvas.image(this.layers[i].graphics, 0, 0);
+        
+        if(this.layers.length == 0){
+            callback();
+            return;
+        }
+
+        loadImage(this.buffer.pop(), 
+            function(img) {
+                this.canvas.image(img, 0, 0);
+                callback();
+            }.bind(this)
+        );
+        
     }
 
     updateRegions(){
@@ -49,19 +65,13 @@ class Drawing{
                 this.curves.image(this.layers[i].graphics);
     }
 
-    removeLast(){
-        if(this.layers.length <= 0) return;
+    removeLast(callback){
+        if(this.layers.length <= 0){
+            return;
+        } 
         
         let x = this.layers.pop();
-        switch(x.type){
-            case 0:
-                this.updateRegions();
-                break;
-            case 1:
-                this.updateCurves();
-                break;
-        }
-        this.updateCanvas();
+        this.updateCanvas(callback);
         x = null;
     }
 
@@ -73,6 +83,7 @@ class Drawing{
         this.canvas.clear();
         this.regions.clear();
         this.curves.clear();
+        this.buffer = [];
     }
 
     getLast(){

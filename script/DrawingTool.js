@@ -1,5 +1,18 @@
 'use strict';
 
+p5.Graphics.prototype.remove = function() {
+    if (this.elt.parentNode) {
+      this.elt.parentNode.removeChild(this.elt);
+    }
+    var idx = this._pInst._elements.indexOf(this);
+    if (idx !== -1) {
+      this._pInst._elements.splice(idx, 1);
+    }
+    for (var elt_ev in this._events) {
+      this.elt.removeEventListener(elt_ev, this._events[elt_ev]);
+    }
+    console.log("REM TOOL");
+};
 class DrawingTool{
     constructor(container, sections = 32, showguides = true){
         this.container = container;
@@ -23,6 +36,9 @@ class DrawingTool{
         this.sampleSize = 0.15;
         this.currentColor = [255, 255, 255, 255];
 
+        this.updateCanvas = this.updateCanvas.bind(this);
+        this.currentcb = null;
+
         this.setSections(sections);
         this.updateCanvas();
     }
@@ -33,6 +49,10 @@ class DrawingTool{
 
         if(this.showguides){
             this.container.image(this.guides, 0, 0);
+        }
+
+        if(typeof this.currentcb === "function"){
+            this.currentcb();
         }
     }
 
@@ -68,9 +88,9 @@ class DrawingTool{
         placeHolder = null;
     }
 
-    undo(){
-        this.drawing.removeLast();
-        this.updateCanvas();
+    undo(callback){
+        this.currentcb = callback;
+        this.drawing.removeLast(this.updateCanvas);
     }
 
     setSections(s){
@@ -227,6 +247,7 @@ class DrawingTool{
         let placeHolder = this.correctCurve(samples);
         
         this.drawing.addLayer(placeHolder.get(), 1);
+        placeHolder.remove();
         placeHolder = null;
         this.updateCanvas();
     }
@@ -259,7 +280,7 @@ class DrawingTool{
 
             placeHolder.pop();
         }
-        return(placeHolder.get());
+        return(placeHolder);
     }
 
     drawCurve(container){

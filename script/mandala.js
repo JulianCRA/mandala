@@ -10,6 +10,7 @@ p5.Graphics.prototype.remove = function() {
     for (var elt_ev in this._events) {
       this.elt.removeEventListener(elt_ev, this._events[elt_ev]);
     }
+    console.log("REM INTERFACE");
 };
 
 $(document).ready(function() {
@@ -51,7 +52,6 @@ let currentDrawing;
 let cnv;
 let currentlyDrawing;
 let mode;
-let ph;
 
 function setup(){
     initSketch(32);
@@ -163,9 +163,24 @@ function slideToolsMenu(){
     }
 }
 
+let isPaused = false;
+
+function pause(){
+    isPaused = true;
+    console.log("PENSANDO...");
+}
+
+function unpause(){
+    console.log("HAGALE...");
+    isPaused = false;
+}
+
 function update(){
     clear();
     image(currentDrawing, 0, 0);
+    if(isPaused){
+        unpause();
+    }
 }
 
 function bucketFill(){
@@ -173,8 +188,8 @@ function bucketFill(){
 }
 
 function undo(){
-    mandala.undo();
-    update();
+    pause();
+    mandala.undo(update);
 }
 
 function restart(){
