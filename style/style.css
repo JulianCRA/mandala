@@ -107,7 +107,7 @@ body{
 #deletebtn{
     background: url('../img/deletebtn.png') center no-repeat;
 }
-#togglesavebtn{
+#togglesavebtn, #savebtn{
     background: url('../img/savebtn.png') center no-repeat;
 }
 
@@ -157,6 +157,21 @@ body{
     background: #000;
     display: block;
     margin-left:200px;
+}
+
+#saveconfig{
+    margin-top: 25px;
+    padding-top: 17px;
+    border-top: 2px solid #ffffff88;
+    border-bottom: 2px solid #ffffff88;
+}
+
+#savebtn{
+    display:block;
+    margin-top: 30px;
+    margin-left: auto;
+    margin-right: auto;
+    margin-bottom: 20px;
 }
 
 /*#region Checkbox*/

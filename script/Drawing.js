@@ -88,7 +88,6 @@ class Drawing{
             x = null;
         }
         this.canvas.clear();
-        this.regions.clear();
         this.curves.clear();
         this.buffer = [];
     }

@@ -175,11 +175,11 @@ function slideSaveMenu(){
     isSaveMenuActive = !isSaveMenuActive;
     
     if(isSaveMenuActive){
-        document.getElementById("saveconfig").style.left = "0px";
+        document.getElementById("savepanel").style.left = "0px";
         document.getElementById("togglesavebtn").style.background = "url('./img/closebtn.png') center no-repeat";
     }
     else{
-        document.getElementById("saveconfig").style.left = "-250px";
+        document.getElementById("savepanel").style.left = "-250px";
         document.getElementById("togglesavebtn").style.background = "url('./img/savebtn.png') center no-repeat";
     }
     
@@ -225,11 +225,6 @@ function sections(sect){
     document.getElementById("sections-label").innerText = "Sections : "+sect;
     mandala.setSections(sect);
     update();
-}
-
-function setSaveDimensions(sd){
-    document.getElementById("dimensions-label").innerText = Math.round(width*sd)+"px x "+Math.round(height*sd)+"px";
-    saveOptions.ratio = sd;
 }
 
 function showGuides(g){

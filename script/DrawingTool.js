@@ -45,7 +45,7 @@ class DrawingTool{
     restart(){
         this.drawing.removeAll();
         this.points = [];
-        his.currentColor = [255, 255, 255, 255];
+        this.currentColor = [255, 255, 255, 255];
         this.updateCanvas();
     }
 
@@ -107,7 +107,7 @@ class DrawingTool{
             saveCanvas(this.drawing.curves, "mandala.png");
         }
         processCurves = processCurves.bind(this);
-        //console.log(opt);
+        console.log(opt);
         if(opt === undefined) opt = {full:true};
         
         if(opt.full == false){
