@@ -10,11 +10,12 @@ p5.Graphics.prototype.remove = function() {
     for (var elt_ev in this._events) {
       this.elt.removeEventListener(elt_ev, this._events[elt_ev]);
     }
-    console.log("REM INTERFACE");
 };
 
 $(document).ready(function() {
-    
+    document.getElementById("bot-checkbox").disabled = true;
+    document.getElementById("fa-checkbox").disabled = true;
+
     $("#colorpicker").spectrum({
         color: 'white',
         flat: true,
@@ -52,12 +53,14 @@ let currentDrawing;
 let cnv;
 let currentlyDrawing;
 let mode;
+let saveOptions;
 
 function setup(){
     initSketch(32);
 }
 
 function initSketch(s){
+    saveOptions = {full:true, bot:false, forcedaliasing:false, ratio:1.0};
     cnv = createCanvas(windowWidth, windowHeight);
     cnv.parent("mandala");
 
@@ -138,7 +141,7 @@ function keyPressed(){
             saveDrawing();
         }
     }
-    //return false;
+    return false;
 }
 
 function keyReleased(){
@@ -150,10 +153,12 @@ function keyReleased(){
     }
 }
 
-let isMenuActive = false;
+let isToolsMenuActive = false;
 function slideToolsMenu(){
-    isMenuActive = !isMenuActive;
-    if(isMenuActive){
+    if(isSaveMenuActive) slideSaveMenu();
+    isToolsMenuActive = !isToolsMenuActive;
+    
+    if(isToolsMenuActive){
         document.getElementById("controls").style.left = "0px";
         document.getElementById("togglemenubtn").style.background = "url('./img/closebtn.png') center no-repeat";
     }
@@ -161,6 +166,23 @@ function slideToolsMenu(){
         document.getElementById("controls").style.left = "-250px";
         document.getElementById("togglemenubtn").style.background = "url('./img/toolsbtn.png') center no-repeat";
     }
+    
+}
+
+let isSaveMenuActive = false;
+function slideSaveMenu(){
+    if(isToolsMenuActive) slideToolsMenu();
+    isSaveMenuActive = !isSaveMenuActive;
+    
+    if(isSaveMenuActive){
+        document.getElementById("saveconfig").style.left = "0px";
+        document.getElementById("togglesavebtn").style.background = "url('./img/closebtn.png') center no-repeat";
+    }
+    else{
+        document.getElementById("saveconfig").style.left = "-250px";
+        document.getElementById("togglesavebtn").style.background = "url('./img/savebtn.png') center no-repeat";
+    }
+    
 }
 
 let isPaused = false;
@@ -200,9 +222,14 @@ function restart(){
 }
 
 function sections(sect){
-    document.getElementById("sections-label").innerText = sect + " sections";
+    document.getElementById("sections-label").innerText = "Sections : "+sect;
     mandala.setSections(sect);
     update();
+}
+
+function setSaveDimensions(sd){
+    document.getElementById("dimensions-label").innerText = Math.round(width*sd)+"px x "+Math.round(height*sd)+"px";
+    saveOptions.ratio = sd;
 }
 
 function showGuides(g){
@@ -210,24 +237,18 @@ function showGuides(g){
     update();
 }
 
-function smoothLines(s){
-    mandala.smoothLines(s);
-    update();
+function antiAlias(aa){
+    mandala.antiAlias = aa;
 }
 
-function hideRegions(l){
-    mandala.linesOnly(l);
-    update();
+function sampleSize(sa){
+    document.getElementById("correction-label").innerText = "Stroke accuracy : "+  sa + "%";
+    mandala.sampleSize = sa / 100;
 }
 
-function hideLines(r){
-    mandala.regionsOnly(r);
-    update();
-}
-
-function sampleSize(v){
-    document.getElementById("correction-label").innerText = v + "% stroke accuracy";
-    mandala.sampleSize = v / 100;
+function strokeWidth(sw){
+    document.getElementById("swidth-label").innerText = "Stroke width : " + sw;
+    mandala.strokeSize = sw;
 }
 
 function setMode(m){
@@ -244,5 +265,21 @@ function setColor(c){
 }
 
 function saveDrawing(){
-    save(mandala.getCurrentCanvas(), "mandala.png");
+    mandala.saveDrawing(saveOptions);
+}
+
+function setSaveOptions(){
+    let linesOnly = document.getElementById("lo-checkbox").checked;
+    document.getElementById("bot-checkbox").disabled = !linesOnly;
+    document.getElementById("fa-checkbox").disabled = !linesOnly;
+    if(!linesOnly){
+        document.getElementById("bot-checkbox").checked = false;
+        document.getElementById("fa-checkbox").checked = false;
+    }
+    let bot = document.getElementById("bot-checkbox").checked;
+    let fa = document.getElementById("fa-checkbox").checked;
+
+    saveOptions.full = !linesOnly;
+    saveOptions.bot = bot;
+    saveOptions.forcedaliasing = fa;
 }

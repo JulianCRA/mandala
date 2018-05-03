@@ -19,7 +19,7 @@ body{
     padding: 0;
 }
 
-#controls{
+.side-panel{
     position: absolute;
     background: #00000088;
     height: 100%;
@@ -107,7 +107,7 @@ body{
 #deletebtn{
     background: url('../img/deletebtn.png') center no-repeat;
 }
-#savebtn{
+#togglesavebtn{
     background: url('../img/savebtn.png') center no-repeat;
 }
 
@@ -196,6 +196,13 @@ input[type=checkbox].toggle-property::after {
 
 input[type=checkbox].toggle-property:checked::after {
     left: 28px;
+}
+
+input[type=checkbox].toggle-property:disabled::after {
+    background-color: #222222;
+    border: 1px solid #444444;
+    width: 30px;
+    height: 20px;
 }
 
 /*#endregion*/

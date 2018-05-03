@@ -5,6 +5,7 @@
         <link rel='stylesheet' href='style/spectrum.css' />
 
         <script src="script/p5.min.js"></script>
+        <!-- <script src="script/p5.dom.js"></script> -->
         <script src="script/Drawing.js"></script>
         <script src="script/DrawingTool.js"></script>
         <script src="script/mandala.js"></script>
@@ -12,8 +13,25 @@
     </head>
     <body>
         <div id = "mandala"></div>
-        
-        <div id="controls">
+        <div id="saveconfig" class="side-panel">
+            <div class="property property-slider" >
+                <label id="dimensions-label"> Dimensions : </label>
+                <input type="range" value="1.0" min="0.2" max="3.0" step="0.1" oninput="setSaveDimensions(this.value)">
+            </div>
+            <div class="property property-check">
+                <label> Lines only :</label>
+                <input id="lo-checkbox" type="checkbox" class="toggle-property" onchange="setSaveOptions()">
+            </div>
+            <div class="property property-check">
+                <label> Black on transparent : </label>
+                <input id="bot-checkbox" type="checkbox" class="toggle-property" onchange="setSaveOptions()">
+            </div>
+            <div class="property property-check">
+                <label id="antialias-label"> Forced aliasing :</label>
+                <input id="fa-checkbox" type="checkbox" class="toggle-property" onchange="setSaveOptions()">
+            </div>
+        </div>
+        <div id="controls" class="side-panel">
             
             <div id="modecontrols">
                 <input type="text" id="colorpicker">
@@ -26,37 +44,33 @@
             </div>
 
             <div class="property property-slider" >
-                <label id="sections-label">32 sections</label>
+                <label id="sections-label"> Sections : 32</label>
                 <input type="range" value="32" min="2" max="128" step="2" oninput="sections(this.value)">
             </div>
             <div class="property property-slider">
-                <label id="correction-label"> 15% stroke accuracy</label>
+                <label id="correction-label"> Stroke accuracy : 15%</label>
                 <input type="range" value="15" min="5" max="50" step="1" oninput="sampleSize(this.value)">
             </div>
+            <div class="property property-slider">
+                <label id="swidth-label"> Stroke width : 3</label>
+                <input type="range" value="3" min="1" max="20" step="1" oninput="strokeWidth(this.value)">
+            </div>
             <div class="property property-check">
-                <label id="reflect-label"> Reflect strokes</label>
+                <label id="reflect-label"> Reflect strokes :</label>
                 <input type="checkbox" class="toggle-property" onchange="reflect(this.checked)" checked>
             </div>
             <div class="property property-check">
-                <label id="guides-label"> Show guides</label>
+                <label id="guides-label"> Show guides :</label>
                 <input type="checkbox" class="toggle-property" onchange="showGuides(this.checked)" checked>
             </div>
             <div class="property property-check">
-                <label id="guides-label"> Hide regions</label>
-                <input type="checkbox" class="toggle-property" onchange="hideRegions(this.checked)">
-            </div>
-            <div class="property property-check">
-                    <label id="guides-label"> Hide lines</label>
-                    <input type="checkbox" class="toggle-property" onchange="hideLines(this.checked)">
-                </div>
-            <div class="property property-check">
-                <label id="smooth-label"> Smooth lines</label>
-                <input type="checkbox" class="toggle-property" onchange="smoothLines(this.checked)" checked>
+                <label id="antialias-label"> Anti-Alias :</label>
+                <input type="checkbox" class="toggle-property" onchange="antiAlias(this.checked)" checked>
             </div>
         </div>
         <div id="quickaccess">
             <button id="togglemenubtn" class="tools-button" onclick="slideToolsMenu()"></button>
-            <button id="savebtn" class="tools-button" onclick="saveDrawing()"></button>
+            <button id="togglesavebtn" class="tools-button" onclick="slideSaveMenu()"></button>
             <button id="undobtn" class="tools-button" onclick="undo()"></button>
             <button id="deletebtn" class="tools-button" onclick="restart()"></button>
         </div>
