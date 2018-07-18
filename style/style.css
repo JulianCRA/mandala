@@ -107,8 +107,29 @@ body{
 #deletebtn{
     background: url('../img/deletebtn.png') center no-repeat;
 }
-#togglesavebtn, #savebtn{
+#togglesavebtn{
     background: url('../img/savebtn.png') center no-repeat;
+}
+
+#savebtn{
+    background: url('../img/downloadbtn.png') center no-repeat;
+    position: relative;
+    border-radius:50%;
+	display:block;
+	cursor:pointer;
+	border:solid 2px #ffffffaa;
+    width: 90px;
+    height: 90px;
+    margin-left: auto;
+    margin-right: auto;
+    outline: none;
+    cursor: pointer;
+}
+
+#savebtn:hover {
+    border-color: #ffffff;
+    border-width: 4px;
+    border-style: solid;
 }
 
 .mode-input {
@@ -128,11 +149,11 @@ body{
 }
 
 #fhb{
-    background: url('../img/drawbtn.png') center no-repeat;
+    background: url('../img/freehandbtn.png') center no-repeat;
 }
 
 #slb{
-    background: url('../img/erasebtn.png') center no-repeat;
+    background: url('../img/straightlinebtn.png') center no-repeat;
 }
 
 #bfb{
@@ -163,16 +184,15 @@ body{
     margin-top: 25px;
     padding-top: 17px;
     border-top: 2px solid #ffffff88;
-    border-bottom: 2px solid #ffffff88;
 }
 
-#savebtn{
+/*#savebtn{
     display:block;
     margin-top: 30px;
     margin-left: auto;
     margin-right: auto;
     margin-bottom: 20px;
-}
+}*/
 
 /*#region Checkbox*/
 

@@ -107,15 +107,17 @@ class DrawingTool{
             saveCanvas(this.drawing.curves, "mandala.png");
         }
         processCurves = processCurves.bind(this);
-        console.log(opt);
-        if(opt === undefined) opt = {full:true};
         
-        if(opt.full == false){
-            if(opt.forcedaliasing === undefined) opt.forcedaliasing = false;
-            this.drawing.updateCurves(opt.forcedaliasing, processCurves);
-        }
-        else{
-            saveCanvas(this.drawing.canvas, "mandala.png");
+        if(this.drawing.layers.length > 0){
+            if(opt === undefined) opt = {full:true};
+            
+            if(opt.full == false){
+                if(opt.forcedaliasing === undefined) opt.forcedaliasing = false;
+                this.drawing.updateCurves(opt.forcedaliasing, processCurves);
+            }
+            else{
+                saveCanvas(this.drawing.canvas, "mandala.png");
+            }
         }
     }
 
