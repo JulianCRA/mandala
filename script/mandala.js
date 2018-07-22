@@ -163,10 +163,18 @@ function slideToolsMenu(){
         document.getElementById("togglemenubtn").style.background = "url('./img/closebtn.png') center no-repeat";
     }
     else{
-        document.getElementById("controls").style.left = "-250px";
+        document.getElementById("controls").style.left = -document.getElementById("controls").offsetWidth;
         document.getElementById("togglemenubtn").style.background = "url('./img/toolsbtn.png') center no-repeat";
     }
     
+}
+
+let mql = window.matchMedia("(max-height: 760px)");
+mql.addListener(screenChanged);
+function screenChanged(){
+    if (mql.matches && !isToolsMenuActive) {
+        document.getElementById('controls').style.left = "-500px";
+    }
 }
 
 let isSaveMenuActive = false;
