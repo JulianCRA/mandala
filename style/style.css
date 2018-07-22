@@ -26,13 +26,15 @@ body{
     width: 250;
     overflow-x: hidden;
     overflow-y: hidden;
-    transition: 0.5s;
+    transition: 0.3s;
     transition-timing-function: ease-out;
     margin: 0px;
     padding-left: 0px;
     padding-top: 50px;
-    left: -250px;
+    left: -500px;
 }
+
+
 
 .property{
     position: relative;
@@ -54,7 +56,7 @@ body{
 
 .property-slider > label{
     font-size: 22px;
-}    
+}
 
 #modecontrols{
     margin-top: 25px;
@@ -73,6 +75,29 @@ body{
     width: 250px;
     padding-left: 15px;
     padding-top: 15px;
+}
+
+@media only screen 
+    and (max-height: 760px){
+        #controls{
+            display: grid;
+
+            width: 500px;
+            grid-template-columns: 250px 250px;
+            grid-gap: 0px;
+            
+            padding: 0px;
+            grid-auto-flow: column;
+        }
+
+        #modecontrols{
+            margin-top: 75px;
+            border-bottom: none;
+        }
+
+        #tweaks{
+            margin-top: 27px;
+        }
 }
 
 .tools-button{
